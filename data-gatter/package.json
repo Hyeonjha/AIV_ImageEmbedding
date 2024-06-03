@@ -1,0 +1,17 @@
+{
+  "name": "data-gatter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "graphql-request": "^7.0.1",
+    "sharp": "^0.33.4"
+  }
+}
