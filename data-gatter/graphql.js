@@ -1,8 +1,8 @@
 import { gql } from 'graphql-request';
 
 export const queryLabelSetIdsInVersion = gql`
-query labelSetIdsInVersion {
-  labelSetIdsInVersion(where: { versionId: { equals: 18165 } })
+query labelSetIdsInVersion($id: Int) {
+  labelSetIdsInVersion(where: { versionId: { equals: $id } })
 }
 `;
 export const queryLabelSet = gql`
