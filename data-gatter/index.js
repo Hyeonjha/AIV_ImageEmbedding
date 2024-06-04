@@ -1,13 +1,14 @@
 import { GraphQLClient } from 'graphql-request';
 import axios from 'axios';
-import fs, { mkdirSync } from 'fs';
+import { mkdirSync } from 'fs';
 import sharp from 'sharp'
 import path from 'path';
 import { queryLabelSet, queryLabelSetIdsInVersion } from './graphql.js';
 
 const endpoint = 'http://192.168.10.63:30832/graphql';
+const imageUnitSize = 100
 
-function getBbox(points, maxW, maxH, margin = 2,) {
+function getBbox(points, maxW, maxH) {
   let minX = 9999999, minY = 9999999
   let maxX = -9999999, maxY = -9999999
   let w = 0, h = 0
@@ -24,16 +25,23 @@ function getBbox(points, maxW, maxH, margin = 2,) {
   w = maxX - minX
   h = maxY - minY
 
-  let x = Math.round(minX - w / 2)
-  let y = Math.round(minY - h / 2)
-  w = w * margin
-  h = h * margin
+  let centerX = (maxX + minX) / 2
+  let centerY = (maxY + minY) / 2
+  w = Math.ceil(w / imageUnitSize) * imageUnitSize
+  h = Math.ceil(h / imageUnitSize) * imageUnitSize
+
+  let x = Math.round(centerX - w / 2)
+  let y = Math.round(centerY - h / 2)
 
   // boundary exception handling
   x = x > 0 ? x : 0
   y = y > 0 ? y : 0
-  w = x + w > maxW ? maxW - x : w
-  h = y + h > maxH ? maxH - y : h
+  if (x + w > maxW) {
+    x = maxW - w
+  }
+  if (y + h > maxH) {
+    y = maxH - h
+  }
 
   return { x, y, w: w, h: h }
 }
