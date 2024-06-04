@@ -6,7 +6,7 @@ import path from 'path';
 import { queryLabelSet, queryLabelSetIdsInVersion } from './graphql.js';
 
 const endpoint = 'http://192.168.10.63:30832/graphql';
-const aivopsVersionId = 18165
+const aivopsVersionId = 18154
 const imageUnitSize = 100
 
 function getBbox(points, maxW, maxH) {
