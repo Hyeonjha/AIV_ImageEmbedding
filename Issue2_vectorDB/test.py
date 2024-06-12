@@ -1,200 +1,142 @@
+import os
+import ssl
+import time
 import numpy as np
+import torch
+from PIL import Image
+from sklearn.metrics.pairwise import cosine_similarity
+import matplotlib.pyplot as plt
+import seaborn as sns
+from pinecone import Pinecone, ServerlessSpec
+from open_clip import create_model_and_transforms
+from torchvision import transforms, models
 
-# 각 모델의 혼동 행렬을 여기에 추가합니다.
-confusion_matrices = {
-    'OmniVec (ViT)': np.array([
-        [9, 0, 1, 0, 1, 0, 3, 0, 0, 0, 2, 0],
-        [0, 14, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [1, 1, 8, 0, 1, 0, 0, 2, 0, 0, 1, 2],
-        [1, 2, 0, 8, 1, 1, 1, 0, 0, 0, 2, 0],
-        [1, 0, 0, 0, 11, 4, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 5, 9, 0, 0, 0, 0, 0, 2],
-        [2, 0, 0, 1, 1, 0, 9, 0, 0, 0, 3, 0],
-        [1, 0, 2, 0, 1, 1, 0, 8, 0, 0, 1, 2],
-        [0, 0, 1, 0, 1, 0, 1, 0, 11, 0, 1, 1],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 1],
-        [1, 0, 2, 2, 0, 1, 3, 1, 0, 0, 5, 1],
-        [1, 0, 4, 0, 1, 1, 2, 0, 0, 0, 1, 6]
-    ]),
-    'CoCa': np.array([
-        [8, 0, 1, 0, 0, 1, 2, 0, 0, 0, 3, 1],
-        [0, 14, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-        [3, 1, 5, 0, 0, 1, 0, 2, 0, 0, 0, 4],
-        [0, 2, 1, 9, 1, 1, 1, 0, 1, 0, 0, 0],
-        [0, 0, 0, 0, 11, 4, 0, 0, 0, 0, 1, 0],
-        [1, 0, 1, 0, 3, 8, 0, 1, 0, 0, 2, 0],
-        [6, 0, 0, 1, 0, 0, 8, 0, 0, 0, 1, 0],
-        [0, 0, 3, 0, 0, 2, 0, 10, 0, 0, 1, 0],
-        [1, 0, 2, 1, 1, 1, 0, 0, 8, 0, 1, 1],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 1],
-        [2, 3, 0, 0, 1, 3, 1, 2, 0, 0, 4, 0],
-        [4, 0, 3, 0, 1, 0, 0, 0, 0, 1, 1, 6]
-    ]),
-    'Swin Transformer V2': np.array([
-        [10, 0, 1, 0, 1, 0, 2, 0, 0, 0, 2, 0],
-        [0, 15, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [2, 1, 6, 0, 0, 1, 0, 3, 0, 0, 0, 3],
-        [0, 1, 0, 8, 0, 1, 1, 0, 1, 0, 4, 0],
-        [0, 0, 0, 0, 9, 7, 0, 0, 0, 0, 0, 0],
-        [1, 0, 1, 0, 4, 10, 0, 0, 0, 0, 0, 0],
-        [1, 0, 0, 1, 0, 3, 10, 0, 0, 0, 1, 0],
-        [0, 0, 2, 1, 0, 0, 0, 11, 0, 0, 0, 2],
-        [0, 0, 0, 0, 1, 0, 2, 0, 11, 0, 1, 1],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 1],
-        [0, 0, 0, 2, 3, 1, 2, 1, 1, 0, 6, 0],
-        [2, 0, 5, 0, 0, 0, 2, 1, 1, 0, 0, 5]
-    ]),
-    'ConvNeXt': np.array([
-        [11, 0, 0, 0, 0, 2, 2, 0, 0, 0, 1, 0],
-        [0, 15, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-        [0, 1, 7, 0, 1, 0, 0, 2, 0, 0, 0, 5],
-        [1, 2, 0, 8, 0, 1, 1, 0, 1, 0, 2, 0],
-        [1, 0, 1, 0, 11, 3, 0, 0, 0, 0, 0, 0],
-        [2, 0, 1, 0, 4, 9, 0, 0, 0, 0, 0, 0],
-        [2, 0, 0, 0, 0, 1, 9, 0, 0, 0, 3, 1],
-        [0, 0, 3, 0, 0, 0, 0, 11, 0, 0, 1, 1],
-        [1, 0, 0, 0, 0, 1, 0, 0, 12, 0, 2, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 1],
-        [1, 0, 0, 3, 1, 2, 1, 1, 1, 0, 5, 1],
-        [1, 0, 3, 0, 1, 0, 1, 0, 0, 1, 0, 9]
-    ]),
-    'EfficientNetV2': np.array([
-        [7, 0, 1, 0, 0, 4, 4, 0, 0, 0, 0, 0],
-        [0, 14, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
-        [1, 1, 8, 0, 1, 0, 1, 2, 0, 0, 0, 2],
-        [0, 1, 0, 11, 0, 1, 2, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 13, 2, 0, 0, 0, 0, 0, 0],
-        [3, 0, 1, 0, 1, 8, 0, 0, 0, 0, 3, 0],
-        [6, 1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 0],
-        [0, 0, 2, 0, 0, 0, 0, 11, 0, 0, 1, 2],
-        [1, 0, 1, 0, 0, 0, 0, 0, 13, 0, 0, 1],
-        [0, 0, 0, 0, 1, 0, 0, 0, 0, 5, 0, 0],
-        [1, 0, 0, 3, 1, 2, 2, 1, 0, 0, 5, 1],
-        [2, 0, 3, 0, 1, 0, 1, 1, 0, 0, 0, 8]
-    ]),
-    'RegNet': np.array([
-        [9, 0, 0, 0, 0, 2, 3, 0, 0, 0, 0, 2],
-        [0, 14, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-        [2, 1, 7, 0, 1, 0, 0, 0, 0, 0, 0, 5],
-        [1, 1, 1, 7, 1, 1, 1, 0, 0, 0, 3, 0],
-        [0, 0, 0, 0, 11, 4, 1, 0, 0, 0, 0, 0],
-        [2, 0, 1, 0, 4, 8, 0, 0, 0, 0, 1, 0],
-        [2, 0, 0, 0, 0, 0, 12, 0, 0, 0, 2, 0],
-        [0, 0, 4, 0, 0, 0, 0, 10, 0, 0, 0, 2],
-        [1, 0, 0, 0, 0, 0, 2, 0, 12, 0, 1, 0],
-        [0, 0, 0, 0, 0, 1, 0, 0, 0, 5, 0, 0],
-        [0, 0, 1, 2, 2, 2, 3, 0, 0, 0, 6, 0],
-        [1, 0, 4, 0, 1, 0, 1, 0, 0, 0, 0, 9]
-    ]),
-    'DeiT': np.array([
-        [9, 0, 0, 0, 0, 2, 4, 0, 0, 0, 0, 1],
-        [0, 14, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0],
-        [3, 1, 6, 0, 0, 1, 0, 4, 0, 0, 0, 1],
-        [0, 1, 0, 8, 4, 0, 1, 0, 0, 0, 2, 0],
-        [1, 0, 0, 0, 8, 6, 0, 0, 0, 0, 1, 0],
-        [1, 0, 0, 0, 5, 10, 0, 0, 0, 0, 0, 0],
-        [5, 0, 0, 0, 0, 0, 8, 0, 0, 0, 3, 0],
-        [0, 0, 3, 0, 0, 0, 0, 10, 0, 0, 1, 2],
-        [1, 0, 0, 1, 2, 1, 0, 0, 11, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 1, 0],
-        [1, 0, 0, 0, 4, 1, 3, 1, 0, 0, 6, 0],
-        [2, 0, 7, 0, 1, 0, 2, 1, 1, 0, 0, 2]
-    ]),
-    'NFNet': np.array([
-        [6, 0, 1, 0, 0, 1, 6, 0, 0, 0, 1, 1],
-        [0, 13, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-        [1, 2, 8, 0, 0, 0, 0, 1, 0, 0, 1, 3],
-        [0, 3, 0, 7, 3, 0, 0, 0, 1, 0, 2, 0],
-        [0, 0, 0, 2, 9, 5, 0, 0, 0, 0, 0, 0],
-        [1, 0, 1, 0, 4, 8, 0, 1, 0, 0, 1, 0],
-        [4, 0, 0, 1, 0, 0, 7, 1, 0, 0, 3, 0],
-        [0, 0, 1, 0, 0, 2, 2, 9, 0, 0, 0, 2],
-        [1, 0, 0, 3, 2, 0, 0, 0, 8, 0, 2, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 0, 0],
-        [2, 0, 1, 3, 2, 2, 0, 0, 1, 0, 5, 0],
-        [1, 0, 7, 0, 0, 2, 1, 2, 0, 0, 0, 3]
-    ]),
-    'ResNet18': np.array([
-        [11, 0, 0, 0, 0, 1, 2, 0, 0, 0, 2, 0],
-        [0, 14, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
-        [0, 1, 10, 0, 1, 0, 0, 0, 0, 0, 1, 3],
-        [0, 3, 0, 6, 1, 0, 1, 0, 1, 0, 4, 0],
-        [1, 0, 0, 0, 11, 3, 0, 0, 0, 0, 1, 0],
-        [3, 0, 2, 0, 2, 7, 0, 0, 1, 0, 1, 0],
-        [1, 0, 0, 1, 0, 0, 9, 0, 0, 1, 3, 1],
-        [1, 0, 2, 0, 2, 0, 0, 9, 0, 0, 1, 1],
-        [0, 0, 1, 0, 0, 1, 0, 0, 11, 0, 2, 1],
-        [0, 0, 0, 0, 0, 0, 1, 0, 0, 5, 0, 0],
-        [1, 0, 1, 2, 1, 3, 1, 0, 1, 0, 6, 0],
-        [1, 0, 2, 0, 1, 0, 1, 0, 0, 1, 0, 10]
-    ]),
-    'ResNet50': np.array([
-        [9, 0, 0, 0, 0, 0, 4, 0, 0, 0, 2, 1],
-        [0, 15, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-        [2, 1, 5, 0, 1, 0, 0, 2, 0, 0, 0, 5],
-        [0, 2, 0, 9, 2, 0, 2, 0, 1, 0, 0, 0],
-        [0, 0, 1, 0, 10, 3, 1, 0, 0, 0, 1, 0],
-        [0, 0, 1, 0, 4, 9, 0, 0, 0, 0, 1, 1],
-        [2, 0, 0, 0, 1, 0, 12, 0, 0, 0, 1, 0],
-        [0, 0, 3, 0, 1, 0, 1, 8, 0, 0, 1, 2],
-        [1, 0, 0, 0, 0, 1, 3, 0, 11, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 0, 0],
-        [1, 0, 0, 0, 2, 1, 2, 1, 0, 0, 8, 1],
-        [1, 0, 2, 0, 0, 1, 2, 1, 0, 0, 0, 9]
-    ]),
-    'EfficientNet B0': np.array([
-        [6, 0, 1, 0, 0, 1, 5, 0, 0, 0, 2, 1],
-        [0, 15, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [2, 2, 4, 0, 0, 1, 0, 3, 0, 0, 0, 4],
-        [0, 1, 0, 9, 1, 1, 1, 0, 1, 0, 2, 0],
-        [0, 0, 0, 0, 10, 3, 0, 1, 0, 0, 0, 2],
-        [1, 0, 1, 0, 2, 10, 0, 0, 0, 0, 1, 1],
-        [3, 0, 0, 1, 1, 0, 10, 0, 0, 0, 1, 0],
-        [0, 0, 5, 0, 1, 0, 0, 8, 0, 0, 1, 1],
-        [0, 0, 1, 0, 0, 1, 0, 1, 12, 0, 0, 1],
-        [0, 0, 0, 0, 0, 1, 0, 0, 0, 5, 0, 0],
-        [0, 0, 0, 1, 1, 3, 2, 1, 0, 0, 8, 0],
-        [0, 0, 5, 0, 0, 2, 1, 0, 2, 0, 0, 6]
-    ]),
-    'EfficientNet B7': np.array([
-        [8, 0, 1, 0, 0, 0, 5, 0, 0, 0, 1, 1],
-        [0, 15, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-        [1, 0, 7, 0, 0, 2, 0, 3, 0, 0, 0, 3],
-        [0, 0, 0, 10, 1, 1, 0, 0, 1, 0, 3, 0],
-        [0, 1, 0, 0, 10, 5, 0, 0, 0, 0, 0, 0],
-        [1, 0, 1, 0, 4, 7, 0, 0, 0, 0, 2, 1],
-        [5, 0, 0, 0, 0, 0, 9, 0, 0, 0, 2, 0],
-        [0, 0, 6, 0, 0, 1, 1, 6, 0, 0, 0, 2],
-        [1, 0, 0, 0, 1, 2, 0, 0, 10, 0, 1, 1],
-        [0, 0, 0, 0, 1, 0, 0, 0, 0, 5, 0, 0],
-        [1, 0, 1, 2, 2, 1, 3, 0, 0, 0, 6, 0],
-        [2, 0, 5, 0, 0, 1, 2, 0, 1, 1, 0, 4]
-    ])
+# SSL 인증서 설정
+import certifi
+os.environ['SSL_CERT_FILE'] = certifi.where()
+ssl._create_default_https_context = ssl._create_unverified_context
 
-}
+class CoCaImg2Vec():
+    def __init__(self, model_name, pretrained, cuda=False):
+        self.model, _, self.transform = create_model_and_transforms(model_name, pretrained=pretrained)
+        self.device = torch.device("cuda" if cuda else "cpu")
+        self.model = self.model.to(self.device)
+        self.model.eval()
 
-# 각 모델의 평균 정확도 계산 함수
-def calculate_average_accuracy(confusion_matrix):
-    accuracy_per_class = []
-    for i in range(len(confusion_matrix)):
-        true_positives = confusion_matrix[i, i]
-        total_samples = np.sum(confusion_matrix[i, :])
-        accuracy = true_positives / total_samples if total_samples > 0 else 0
-        accuracy_per_class.append(accuracy)
+    def get_vec(self, img):
+        image = self.transform(img).unsqueeze(0).to(self.device)
+        with torch.no_grad():
+            embedding = self.model.encode_image(image).cpu().numpy().flatten()
+        return embedding
+
+class Img2Vec():
+    def __init__(self, model_name, cuda=False):
+        self.device = torch.device("cuda" if cuda else "cpu")
+        self.model = getattr(models, model_name)(pretrained=True).to(self.device)
+        self.model.eval()
+        self.transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
+
+    def get_vec(self, img):
+        image = self.transform(img).unsqueeze(0).to(self.device)
+        with torch.no_grad():
+            embedding = self.model(image)
+        embedding_np = embedding.cpu().numpy().flatten()
+        #print(f"Embedding dimension for {self.model.__class__.__name__}: {embedding_np.shape[0]}")
+        return embedding_np
+
+def load_images_from_folder(folder):
+    images = []
+    labels = []
+    valid_image_extensions = ['.jpg', '.jpeg', '.png', '.bmp', '.tiff']
+    for class_folder_name in os.listdir(folder):
+        class_folder_path = os.path.join(folder, class_folder_name)
+        if not os.path.isdir(class_folder_path):
+            continue
+        for filename in os.listdir(class_folder_path):
+            img_path = os.path.join(class_folder_path, filename)
+            if os.path.splitext(filename)[1].lower() in valid_image_extensions:
+                img = Image.open(img_path).convert('RGB')
+                images.append(img)
+                labels.append(class_folder_name)
+    return images, labels
+
+def create_pinecone_index(api_key, index_name, dimension):
+    pc = Pinecone(api_key=api_key)
+    if index_name not in pc.list_indexes().names():
+        pc.create_index(
+            name=index_name,
+            dimension=dimension,
+            metric='cosine',
+            spec=ServerlessSpec(
+                cloud='aws',
+                region="us-east-1"
+            )
+        )
+    return pc.Index(index_name)
+
+def save_embeddings_to_pinecone(index, embeddings, labels, namespace):
+    vectors = []
+    for i, emb in enumerate(embeddings):
+        vectors.append({
+            "id": f"vec{i+1}",
+            "values": emb.tolist(),
+            "metadata": {"label": labels[i]}
+        })
+
+    index.upsert(
+        vectors=vectors,
+        namespace=namespace
+    )
     
-    average_accuracy = np.mean(accuracy_per_class)
-    return average_accuracy
+    return vectors
 
-# 각 모델의 평균 정확도 계산
-average_accuracies = {model: calculate_average_accuracy(cm) for model, cm in confusion_matrices.items()}
+def classify_images_with_pinecone(model_dict, folder_path, api_key, index_name, namespace, cuda=False):
+    images, labels = load_images_from_folder(folder_path)
+    all_vectors = []
 
-# 결과 출력
-for model, accuracy in average_accuracies.items():
-    print(f"{model}: {accuracy:.2%}")
+    for model_name, model in model_dict.items():
+        print(f"Evaluating model {model_name}")
+        img2vec = Img2Vec(model, cuda=cuda)
+        if img2vec.model is None:
+            continue
 
-# 가장 높은 평균 정확도를 가진 모델 선택
-best_model = max(average_accuracies, key=average_accuracies.get)
-best_accuracy = average_accuracies[best_model]
+        start_time = time.time()
+        embeddings = [img2vec.get_vec(img) for img in images]
+        embeddings = [e for e in embeddings if e is not None]
+        embeddings = np.array(embeddings)
+        processing_time = (time.time() - start_time) / len(images)
+        print(f"Processing Time per Image: {processing_time}")
 
-print(f"\n최고의 모델: {best_model}")
-print(f"평균 정확도: {best_accuracy:.2%}")
+        # Create Pinecone index
+        index = create_pinecone_index(api_key, index_name, embeddings.shape[1])
+        
+        # Save embeddings to Pinecone
+        vectors = save_embeddings_to_pinecone(index, embeddings, labels, namespace)
+        all_vectors.extend(vectors)
+
+    return all_vectors
+
+def visualize_embeddings(vectors):
+    print("Embedding vectors and their metadata:")
+    for vector in vectors:
+        print(f"ID: {vector['id']}, Label: {vector['metadata']['label']}, Vector: {vector['values'][:5]}...")
+
+if __name__ == "__main__":
+    folder_path = './data-gatter/train_L'
+    api_key = 'f5001027-9bd4-4abb-8dd6-a2db16540ecc'
+    index_name = 'convnext'
+    namespace = 'ns1'
+    
+    model_dict = {
+        'ConvNeXt': 'convnext_base',
+        #'EfficientNetV2': 'efficientnet_v2_s'
+    }
+
+    cuda = torch.cuda.is_available()
+
+    vectors = classify_images_with_pinecone(model_dict, folder_path, api_key, index_name, namespace, cuda)
+    visualize_embeddings(vectors)
