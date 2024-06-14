@@ -15,4 +15,4 @@ RUN git clone https://github.com/pgvector/pgvector /tmp/pgvector && \
     rm -rf /tmp/pgvector
 
 # Copy initialization script
-COPY init-db.sh /docker-entrypoint-initdb.d/
+COPY init-db.sh /docker-entrypoint-initdb.d/init-db.sh
