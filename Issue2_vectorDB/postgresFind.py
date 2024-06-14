@@ -19,19 +19,19 @@ def find_similar_images(input_image_path, session, threshold=0.8, top_n=5):
     input_embedding = img2vec.get_vec(img).tolist()
 
     # 디버깅 출력 추가
-    print(f"Input Embedding: {input_embedding}")
+    #print(f"Input Embedding: {input_embedding}")
     
     # Postgres의 pgvector 사용하여 유사도 계산 및 검색
     query = text(f"""
-        SELECT image_path, label, 1 - (embedding_vector <-> '{input_embedding}'::vector) AS similarity
+        SELECT image_path, label, 1 - (embedding_vector <=> '{input_embedding}'::vector) AS similarity
         FROM image_embeddings
-        WHERE embedding_vector <-> '{input_embedding}'::vector <= {1 - threshold}
-        ORDER BY embedding_vector <-> '{input_embedding}'::vector
+        WHERE embedding_vector <=> '{input_embedding}'::vector <= {1 - threshold}
+        ORDER BY embedding_vector <=> '{input_embedding}'::vector
         LIMIT :top_n;
     """)
 
     # 디버깅 출력 추가
-    print(f"Query: {query}")
+    #print(f"Query: {query}")
 
     results = session.execute(query, {'top_n': top_n}).fetchall()
     similarities = [(row.image_path, row.label, row.similarity) for row in results]
