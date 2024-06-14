@@ -1,0 +1,9 @@
+torch
+torchvision
+pillow
+numpy
+sqlalchemy
+timm
+psycopg2-binary
+scikit-learn
+pgvector
