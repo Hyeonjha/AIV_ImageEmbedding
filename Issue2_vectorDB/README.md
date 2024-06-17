@@ -1,94 +1,99 @@
-# PostgreSQL Docker 이미지 실행
-```terminal
-docker run --name my_postgres -e POSTGRES_PASSWORD=aiv11011 -d -p 5432:5432 postgres
+# Issue2_vectorDB 프로젝트
+PostgreSQL 데이터베이스와 pgvector 확장을 사용하여 이미지 임베딩을 저장하고 유사한 이미지를 검색하는 기능 구현. 
+Docker를 사용하여 PostgreSQL을 설정하고, Python 스크립트를 통해 이미지 임베딩을 처리.
+
+## 디렉토리 구조
+```
+Issue2_vectorDB/
+├── docker-compose.yml
+├── Dockerfile
+├── init-db.sh
+├── Img2Vec.py
+├── ImageEmbedding.py
+├── postgresStore.py
+├── postgresFind.py
+└── requirements.txt
 ```
 
-# 가상환경 생성, 활성화
+## 설치 및 실행 방법
 
-```terminal
- python -m venv venv
- source venv/bin/activate
+### 1. Docker 및 Docker Compose 설치
+
+Docker와 Docker Compose가 설치되어 있어야 합니다. 설치되지 않았다면 다음 링크를 참조하여 설치합니다.
+- [Docker 설치](https://docs.docker.com/get-docker/)
+- [Docker Compose 설치](https://docs.docker.com/compose/install/)
+
+### 2. 프로젝트 클론 및 이동
+
+프로젝트를 클론하고 해당 디렉토리로 이동합니다.
+
+```sh
+git clone <프로젝트_저장소_URL>
+cd Issue2_vectorDB
 ```
 
-# 가상 환경 활성화된 상태에서 필요한 패키지 설치
-```terminal
-pip install psycopg2-binary sqlalchemy torch torchvision pillow numpy
+### 3. Docker Compose 빌드 및 실행
+
+Docker Compose를 사용하여 PostgreSQL 컨테이너를 빌드하고 실행합니다.
+
+```sh
+docker-compose up -d --build
 ```
 
-# PostgreSQL 셸에서 데이터 확인
-# 1. PostgreSQL 셸 접속
-# 2. 데이터베이스 ㅡ사용
-# 3. 데이터 조회
-```terminal
-docker exec -it my_postgres psql -U postgres
-\c postgres
-SELECT * FROM image_embeddings;
+### 4. 데이터베이스 초기화 확인
+
+PostgreSQL 컨테이너가 정상적으로 실행되고 초기화 스크립트가 실행되었는지 확인합니다. 로그를 확인하여 초기화 스크립트가 성공적으로 실행되었는지 확인합니다.
+
+```sh
+docker logs <컨테이너_ID>
 ```
 
-# 테이블 삭제
-```terminal
-DROP TABLE IF EXISTS image_embeddings;
+### 5. 이미지 임베딩 저장
+
+`postgresStore.py` 스크립트를 실행하여 이미지 임베딩을 데이터베이스에 저장합니다. 이 스크립트는 `data-gatter/train_L` 디렉토리의 이미지를 처리합니다.
+
+```sh
+python postgresStore.py
 ```
 
-# 테이블 다시 생성
-```terminal
-CREATE TABLE image_embeddings (
-    id SERIAL PRIMARY KEY,
-    image_path VARCHAR(255) UNIQUE NOT NULL,
-    label VARCHAR(255) NOT NULL,
-    embedding FLOAT[] NOT NULL
-);
-```
-### Milvus 설치 및 설정 
+### 6. 유사한 이미지 검색
 
-# 1. Milvus 실행 위해 `docker-compose.yml` 파일 작성
-#    해당 파일 있는 디렉토리에서 다음 명령어 실행 -> Milvus 시행
-```terminal
-docker-compose up -d
+`postgresFind.py` 스크립트를 실행하여 유사한 이미지를 검색합니다. 이 스크립트는 `data-gatter/testcopy/bubble_381007.jpg` 이미지를 기준으로 유사한 이미지를 찾습니다. (변경 가능)
+
+```sh
+python postgresFind.py
 ```
 
-# 2. PyMilvus 설치
-#    Milvus와 상호작용하기 위해 Python 클라이언트 라이브러리인 `pymilvus` 설치
-```terminal
-pip install pymilvus
-```
+## 파일 설명
 
+### docker-compose.yml
 
+Docker Compose 설정 파일. PostgreSQL 컨테이너 설정.
 
+### Dockerfile
 
-# 설치 스크립트 다운로드
-```terminal
-curl -sfL https://raw.githubusercontent.com/milvus-io/milvus/master/scripts/standalone_embed.sh -o standalone_embed.sh
-```
+PostgreSQL 이미지에 필요한 패키지 & pgvector 확장을 설치하는 설정 파일.
 
-# 스크립트 실행 권한 부여
-```terminal
-chmod +x standalone_embed.sh
-```
+### init-db.sh
 
-# Docker 컨테이너 시작
-```terminal
-bash standalone_embed.sh start
-```
+PostgreSQL 데이터베이스 초기화 스크립트. pgvector 확장 설치, 필요한 테이블과 컬럼 생성.
 
-# Milvus 컨테이너 상태 확인 - 컨테이너가 정상적으로 실행 중인지 확인하려면 다음 명령어를 사용합니다.
-```terminal
-docker ps
-```
-#   실행 중인 컨테이너 목록에 milvus-standalone 컨테이너가 표시, STATUS가 healthy로 표시되면 정상적으로 실행된 것
+### Img2Vec.py
 
+이미지 임베딩 생성하는 클래스 정의 파일. ConvNext 모델 사용하여 이미지를 임베딩 벡터로 변환.
 
-# 의존성 install
-```terminal
-pip install -r requirements.txt
-```
+### ImageEmbedding.py
 
+SQLAlchemy를 사용하여 데이터베이스 테이블을 정의하는 파일. 이미지 경로, 라벨, 임베딩 벡터를 저장.
 
+### postgresStore.py
 
+이미지를 임베딩하여 데이터베이스에 저장하는 스크립트.
 
+### postgresFind.py
 
+데이터베이스에서 유사한 이미지를 검색하는 스크립트.
 
-#
-```terminal
-docker run -d --name weaviate --env QUERY_DEFAULTS_LIMIT=25 --env CLUSTERS_PEERS_ACTION_BATCHING_WORKERS=4 --env CLUSTER_SLAVES_COUNT=2 --env AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED=true --restart=unless-stopped --env PERSISTENCE_DATA_PATH="/var/lib/weaviate" --volume /var/lib/weaviate:/var/lib/weaviate --publish 8080:8080 semitechnologies/weaviate:1.19.2
-```
+### requirements.txt
+
+프로젝트에 필요한 Python 패키지 목록.
