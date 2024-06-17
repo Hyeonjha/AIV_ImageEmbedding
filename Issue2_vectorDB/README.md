@@ -109,7 +109,7 @@ python postgresStorePerf.py
 python postgresFind.py
 ```
 
-### 2. 성능 평가와 함께 이미지 검색 (update)
+### 2-1. 성능 평가와 함께 이미지 검색 (update)
 
 이 스크립트는 PostgreSQL 데이터베이스에서 코사인 유사도를 사용하여 유사한 이미지를 검색합니다. 10,000회 반복하여 검색 시간의 평균 및 표준 편차를 측정하고 출력합니다.
 
