@@ -23,7 +23,7 @@ def find_similar_images(input_image_path, session, threshold=0.8, top_n=5):
     
     # Postgres의 pgvector 사용하여 유사도 계산 및 검색
     query = text(f"""
-        SELECT image_path, label, 1 - (embedding_vector <=> '{input_embedding}'::vector) AS similarity
+        SELECT image_path, label, 1 - (embedding_vector <=> '{input_embedding}'::vector) AS cosine_similarity
         FROM image_embeddings
         WHERE embedding_vector <=> '{input_embedding}'::vector <= {1 - threshold}
         ORDER BY embedding_vector <=> '{input_embedding}'::vector
@@ -34,11 +34,13 @@ def find_similar_images(input_image_path, session, threshold=0.8, top_n=5):
     #print(f"Query: {query}")
 
     results = session.execute(query, {'top_n': top_n}).fetchall()
-    similarities = [(row.image_path, row.label, row.similarity) for row in results]
+    similarities = [(row.image_path, row.label, row.cosine_similarity) for row in results]
 
     return similarities
 
 if __name__ == "__main__":
-    input_image_path = 'data-gatter/testcopy/bubble_381007.jpg'
+    input_image_path = 'data-gatter/test/bubble_380033.jpg'
     similar_images = find_similar_images(input_image_path, session)
-    print(similar_images)
+    #print(similar_images)
+    for image_path, label, cosine_similarity in similar_images:
+        print(f"Image Path: {image_path}, Label: {label}, Similarity: {cosine_similarity:.4f}")
