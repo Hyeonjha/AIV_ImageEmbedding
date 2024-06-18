@@ -1,4 +1,3 @@
-# cosine_similarity_comparison.py
 import numpy as np
 from PIL import Image
 import weaviate
@@ -18,6 +17,10 @@ def cosine_similarity_manual(vec1, vec2):
     norm_b = np.linalg.norm(vec2)
     return dot_product / (norm_a * norm_b)
 
+# Weaviate certainty 값을 코사인 유사도로 변환하는 함수
+def weaviate_certainty_to_cosine(certainty):
+    return 2 * certainty - 1
+
 # 테스트 이미지 경로
 test_image_path = 'data-gatter/test'
 test_image_files = [os.path.join(test_image_path, f) for f in os.listdir(test_image_path) if os.path.splitext(f)[1].lower() in ['.jpg', '.jpeg', '.png', '.bmp', '.tiff']]
@@ -31,13 +34,14 @@ for img_path in test_image_files:
     input_embedding = img2vec.get_vec(img)
 
     # Weaviate에서 유사한 이미지 검색
-    query_result = client.query.get("ImageEmbedding", ["image_path", "label", "_additional {distance}"])\
-        .with_near_vector({"vector": input_embedding, "certainty": 0.8})\
+    query_result = client.query.get("ImageEmbedding", ["image_path", "label", "_additional {certainty}"])\
+        .with_near_vector({"vector": input_embedding})\
         .with_limit(5)\
         .do()
 
     for result in query_result['data']['Get']['ImageEmbedding']:
-        weaviate_similarity = 1 - result['_additional']['distance']  # distance를 이용하여 유사도 계산
+        weaviate_certainty = result['_additional']['certainty']
+        weaviate_similarity = weaviate_certainty_to_cosine(weaviate_certainty)  # certainty를 이용하여 코사인 유사도로 변환
         result_image_path = result['image_path']
         result_img = Image.open(result_image_path).convert('RGB')
         result_embedding = img2vec.get_vec(result_img)
@@ -54,5 +58,5 @@ similarities_manual = np.array(similarities_manual)
 mean_diff = np.mean(np.abs(similarities_weaviate - similarities_manual))
 std_diff = np.std(np.abs(similarities_weaviate - similarities_manual))
 
-print(f"Mean difference between Weaviate and manual cosine similarity: {mean_diff}")
-print(f"Standard deviation of difference: {std_diff}")
+print(f"Mean difference between Weaviate and manual cosine similarity: {mean_diff:.4f}")
+print(f"Standard deviation of difference: {std_diff:.4f}")
