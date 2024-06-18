@@ -15,6 +15,8 @@ Issue2_vectorDB/
 ├── postgresStorePerf.py
 ├── postgresFindPerf.py
 ├── postgreSim.py
+├── postInsertV.py
+├── postSearchT.py
 ├── requirements.txt
 └── README.md
 ```
@@ -93,12 +95,20 @@ docker logs <컨테이너_ID>
 python postgresStore.py
 ```
 
-### 1-1. 성능 평가와 함께 이미지 임베딩 저장 (update)
+### 1-1. 성능 평가와 함께 이미지 임베딩 저장 
 
-이 스크립트는 ConvNext 모델을 사용하여 이미지 임베딩을 추출하고 PostgreSQL 데이터베이스에 저장합니다. 또한, 10,000회 반복하여 삽입 시간의 평균 및 표준 편차를 측정하고 출력합니다.
+이 스크립트는 ConvNext 모델을 사용하여 이미지 임베딩을 추출하고 PostgreSQL 데이터베이스에 저장합니다. 또한, 10,000회 (20회) 반복하여 삽입 시간의 평균 및 표준 편차를 측정하고 출력합니다.
 
 ```sh
 python postgresStorePerf.py
+```
+
+### 1-2. 성능 평가와 함께 가짜 벡터 저장 
+
+이 스크립트는 100,000개의 가짜 벡터를 생성하여 PostgreSQL 데이터베이스에 저장합니다. 또한, 이 데이터들의 삽입 시간의 평균 및 표준 편차를 10,000회마다 측정하고 출력합니다.
+
+```sh
+python postInsertV.py
 ```
 
 ### 2. 유사한 이미지 검색
@@ -109,12 +119,20 @@ python postgresStorePerf.py
 python postgresFind.py
 ```
 
-### 2-1. 성능 평가와 함께 이미지 검색 (update)
+### 2-1. 성능 평가와 함께 이미지 검색 
 
 이 스크립트는 PostgreSQL 데이터베이스에서 코사인 유사도를 사용하여 유사한 이미지를 검색합니다. 10,000회 반복하여 검색 시간의 평균 및 표준 편차를 측정하고 출력합니다.
 
 ```sh
 python postgresFindPerf.py
+```
+
+### 2-2. 성능 평가와 함께 벡터 검색
+
+이 스크립트는 PostgreSQL 데이터베이스에서 코사인 유사도를 사용하여 유사한 이미지를 검색합니다. 100,000회 반복하여 검색 시간의 평균 및 표준 편차를 10,000회마다 측정하고 출력합니다.
+
+```sh
+python postSearchT.py
 ```
 
 ### 3. 유사도 계산 비교
@@ -163,6 +181,14 @@ SQLAlchemy를 사용하여 데이터베이스 테이블을 정의하는 파일. 
 
 데이터베이스에서 유사한 이미지를 검색하고 검색 성능을 측정하는 스크립트.
 
+### postInsertV.py
+
+fake vector 생성하여 10만개의 데이터 저장하는 모델의 성능 평가
+
+### postSearchT.py
+
+10만개의 데이터 검색하는 모델의 성능 평가
+
 ### requirements.txt
 
 프로젝트에 필요한 Python 패키지 목록.
@@ -174,40 +200,59 @@ SQLAlchemy를 사용하여 데이터베이스 테이블을 정의하는 파일. 
 - **data-gatter/test**: 검색 기능을 테스트하기 위한 이미지가 포함된 폴더.
 
 
-## 예제 (20회 반복했을 때의 결과)
+## 성능 평가
 
-### 이미지 임베딩 저장 성능 평가 실행
+### 임베딩 저장, 검색 성능 평가 실행 (10,000개) 
+
+출력 결과:
+
+```
+Insert times over 10000 embeddings: 0.009964231491088868 ± 0.0015895360776028442 seconds
+Search times over 10000 iterations: 0.05208480780124664 ± 0.004131978767582321 seconds
+```
+
+### ### 임베딩 저장, 검색 성능 평가 실행 (10만개의 fake vector 생성 후 저장, 검색 -> 10,000개 단위)
 
 ```sh
-python postgresStorePerf.py
+python postInsertV.py
 ```
 
-출력 예시:
+출력 결과:
 
 ```
-Insert times over 20 iterations: 0.013816761970520019 ± 0.004027176911622213 seconds
-```
-
-### 이미지 검색 성능 평가 실행
-
-```sh
-python postgresFindPerf.py
-```
-
-출력 예시:
-
-```
-Search times over 20 iterations: 4.3378861784935 ± 0.1205780243903615 seconds
+Inserting 10000 embeddings...
+Insert times over 10000 embeddings: 0.00987683801651001 ± 0.0034335988844233934 seconds
+Inserting 20000 embeddings...
+Insert times over 10000 embeddings: 0.00980962405204773 ± 0.002016624127072981 seconds
+Inserting 30000 embeddings...
+Insert times over 10000 embeddings: 0.009833124709129334 ± 0.002312757151848678 seconds
+Inserting 40000 embeddings...
+Insert times over 10000 embeddings: 0.010633320093154907 ± 0.003667472597662235 seconds
+Inserting 50000 embeddings...
+Insert times over 10000 embeddings: 0.010132505178451538 ± 0.0019775696195001567 seconds
+Inserting 60000 embeddings...
+Insert times over 10000 embeddings: 0.00995038526058197 ± 0.002248606919583813 seconds
+Inserting 70000 embeddings...
+Insert times over 10000 embeddings: 0.01005813102722168 ± 0.0023467888584746592 seconds
+Inserting 80000 embeddings...
+Insert times over 10000 embeddings: 0.009985102987289428 ± 0.0018872216636339483 seconds
+Inserting 90000 embeddings...
+Insert times over 10000 embeddings: 0.009961880087852478 ± 0.002118598653167788 seconds
+Inserting 100000 embeddings...
+Insert times over 10000 embeddings: 0.01068202040195465 ± 0.0037268060481944892 seconds
 ```
 
 ### 유사도 계산 비교 실행
 
 ```sh
-python postgreSim.py
+python postSearchT.py
 ```
 
-출력 예시:
+출력 결과:
 
+100,000개의 데이터베이스가 저장된 상태에서의 성능평가 -> 데이터베이스에 데이터 10,000개 저장되어있을때보다 검색 시간 16배 증가
 ```
-All similarities match between PostgreSQL and manually calculated values.
+Search times for 100 queries: 0.8379068636894226 ± 0.09632197552364523 seconds
+
+Search times for 1000 queries: 0.8289583191871643 ± 0.09643168655288632 seconds
 ```

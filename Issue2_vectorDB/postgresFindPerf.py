@@ -23,10 +23,10 @@ def find_similar_images(input_image_path, session, threshold=0.8, top_n=5):
     
     # Postgres의 pgvector 사용하여 유사도 계산 및 검색
     query = text(f"""
-        SELECT image_path, label, 1 - (embedding_vector <-> '[{','.join(map(str, input_embedding))}]') AS similarity
+        SELECT image_path, label, 1 - (embedding_vector <=> '[{','.join(map(str, input_embedding))}]') AS similarity
         FROM image_embeddings
-        WHERE embedding_vector <-> '[{','.join(map(str, input_embedding))}]' <= {1 - threshold}
-        ORDER BY embedding_vector <-> '[{','.join(map(str, input_embedding))}]'
+        WHERE embedding_vector <=> '[{','.join(map(str, input_embedding))}]' <= {1 - threshold}
+        ORDER BY embedding_vector <=> '[{','.join(map(str, input_embedding))}]'
         LIMIT :top_n;
     """)
 
