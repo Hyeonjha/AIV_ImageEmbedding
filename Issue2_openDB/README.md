@@ -1,4 +1,4 @@
-# Issue2_VectorDB 프로젝트
+# Issue2_openDB 프로젝트
 Weaviate 데이터베이스를 사용하여 이미지 임베딩을 저장하고 유사한 이미지를 검색하는 기능 구현. Docker를 사용하여 Weaviate를 설정하고, Python 스크립트를 통해 이미지 임베딩을 처리.
 
 ## 디렉토리 구조
@@ -6,10 +6,13 @@ Weaviate 데이터베이스를 사용하여 이미지 임베딩을 저장하고 
 Issue2_VectorDB/
 ├── docker-compose.yml
 ├── Img2Vec.py
+├── initializeDB.py
 ├── weaviateStore.py
 ├── weaviateFind.py
 ├── weaviatePerf.py
 ├── weaviateSim.py
+├── weavInsertV.py
+├── weavSearchT.py
 ├── requirements.txt
 └── README.md
 ```
@@ -132,6 +135,18 @@ Weaviate 데이터베이스에서 유사한 이미지를 검색하는 스크립�
 
 Weaviate에서 계산한 유사도 값과 수동으로 계산한 코사인 유사도 값을 비교하는 스크립트.
 
+### initializeDB.py
+
+데이터베이스에 저장된 데이터 초기화.
+
+### weavInsertV.py
+
+fake vector 생성하여 10만개의 데이터 저장하는 모델의 성능 평가
+
+### weavSearchT.py
+
+10만개의 데이터 검색하는 모델의 성능 평가
+
 ### requirements.txt
 
 프로젝트에 필요한 Python 패키지 목록.
@@ -142,30 +157,55 @@ Weaviate에서 계산한 유사도 값과 수동으로 계산한 코사인 유�
 - **data-gatter/test**: 검색 기능을 테스트하기 위한 이미지가 포함된 폴더.
 
 
-## 예제 (20회 반복했을 때의 결과)
 
-### 이미지 임베딩 저장, 검색 성능 평가 실행
+## 성능 평가 
+
+### 임베딩 저장, 검색 성능 평가 실행 (10,000개) 
+
+출력 결과:
+
+```
+Insert - Mean time: 0.008721607756614685, Std time: 0.0015508988667878847
+Search - Mean time: 0.013982857489585877, Std time: 0.001693721139744062
+```
+
+### 임베딩 저장, 검색 성능 평가 실행 (10만개의 fake vector 생성 후 저장, 검색 -> 10,000개 단위)
 
 ```sh
-python weaviatePerf.py
+python weavInsertV.py
 ```
 
-출력 예시:
+출력 결과:
 
 ```
-Insert - Mean time: 0.008717226982116699, Std time: 0.0009743874480479035
-Search - Mean time: 0.013183975219726562, Std time: 0.0018419031956134915
+Inserted 10000 vectors - Batch mean time: 0.0090, Batch std time: 0.0016
+Inserted 20000 vectors - Batch mean time: 0.0136, Batch std time: 0.0032
+Inserted 30000 vectors - Batch mean time: 0.0164, Batch std time: 0.0034
+Inserted 40000 vectors - Batch mean time: 0.0181, Batch std time: 0.0042
+Inserted 50000 vectors - Batch mean time: 0.0199, Batch std time: 0.0051
+Inserted 60000 vectors - Batch mean time: 0.0215, Batch std time: 0.0057
+Inserted 70000 vectors - Batch mean time: 0.0226, Batch std time: 0.0061
+Inserted 80000 vectors - Batch mean time: 0.0234, Batch std time: 0.0061
+Inserted 90000 vectors - Batch mean time: 0.0256, Batch std time: 0.0076
+Inserted 100000 vectors - Batch mean time: 0.0284, Batch std time: 0.0131
+Total Insert - Mean time: 0.0198, Std time: 0.0084
 ```
-
-### 유사도 계산 비교 실행
 
 ```sh
-python weaviateSim.py
-```
+python weavSearchT.py
 
-출력 예시:
+출력 결과:
 
 ```
-Mean difference between Weaviate and manual cosine similarity: 2.3638725029200028e-07
-Standard deviation of difference: 1.8026255796318865e-07
+Searched 10000 vectors - Batch mean time: 0.0179, Batch std time: 0.0018
+Searched 20000 vectors - Batch mean time: 0.0179, Batch std time: 0.0022
+Searched 30000 vectors - Batch mean time: 0.0177, Batch std time: 0.0032
+Searched 40000 vectors - Batch mean time: 0.0169, Batch std time: 0.0012
+Searched 50000 vectors - Batch mean time: 0.0168, Batch std time: 0.0012
+Searched 60000 vectors - Batch mean time: 0.0169, Batch std time: 0.0017
+Searched 70000 vectors - Batch mean time: 0.0168, Batch std time: 0.0012
+Searched 80000 vectors - Batch mean time: 0.0171, Batch std time: 0.0019
+Searched 90000 vectors - Batch mean time: 0.0170, Batch std time: 0.0025
+Searched 100000 vectors - Batch mean time: 0.0169, Batch std time: 0.0016
+Total Search - Mean time: 0.0172, Std time: 0.0020
 ```
