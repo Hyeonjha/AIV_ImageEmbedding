@@ -17,6 +17,8 @@ Issue2_vectorDB/
 ├── postgreSim.py
 ├── postInsertV.py
 ├── postSearchT.py
+├── postLSHstore.py
+├── postLSHsearch.py
 ├── requirements.txt
 └── README.md
 ```
@@ -189,6 +191,14 @@ fake vector 생성하여 10만개의 데이터 저장하는 모델의 성능 평
 
 10만개의 데이터 검색하는 모델의 성능 평가
 
+### postLSHstore.py
+
+기존 저장 방식에서 LSH에 저장하는 방식으로 업데이트. 데이터 저장 성능 평가
+
+### postLSHsearch.py
+
+기존 저장 방식에서 LSH에 저장하는 방식으로 업데이트. 데이터 검색 성능 평가
+
 ### requirements.txt
 
 프로젝트에 필요한 Python 패키지 목록.
@@ -211,7 +221,7 @@ Insert times over 10000 embeddings: 0.009964231491088868 ± 0.001589536077602844
 Search times over 10000 iterations: 0.05208480780124664 ± 0.004131978767582321 seconds
 ```
 
-### ### 임베딩 저장, 검색 성능 평가 실행 (10만개의 fake vector 생성 후 저장, 검색 -> 10,000개 단위)
+### ### 임베딩 저장 성능 평가 실행 (10만개의 fake vector 생성 후 저장, 검색 -> 10,000개 단위)
 
 ```sh
 python postInsertV.py
@@ -242,7 +252,7 @@ Inserting 100000 embeddings...
 Insert times over 10000 embeddings: 0.01068202040195465 ± 0.0037268060481944892 seconds
 ```
 
-### 유사도 계산 비교 실행
+### 검색 성능 평가 실행
 
 ```sh
 python postSearchT.py
@@ -255,4 +265,78 @@ python postSearchT.py
 Search times for 100 queries: 0.8379068636894226 ± 0.09632197552364523 seconds
 
 Search times for 1000 queries: 0.8289583191871643 ± 0.09643168655288632 seconds
+```
+
+### 데이터 저장 방식 변경 - GIST
+```
+GIST
+Inserting 10000 embeddings...
+Insert times over 10000 embeddings: 0.014438557243347168 ± 0.013971510376183268 seconds
+Inserting 20000 embeddings...
+Insert times over 10000 embeddings: 0.014118605327606202 ± 0.007282303888130275 seconds
+Inserting 30000 embeddings...
+Insert times over 10000 embeddings: 0.01362208206653595 ± 0.0032048428731961294 seconds
+Inserting 40000 embeddings...
+Insert times over 10000 embeddings: 0.01344443953037262 ± 0.0021838547421636216 seconds
+Inserting 50000 embeddings...
+Insert times over 10000 embeddings: 0.013214104318618775 ± 0.0015636945214204784 seconds
+Inserting 60000 embeddings...
+Insert times over 10000 embeddings: 0.013265347409248352 ± 0.0019140397095729427 seconds
+Inserting 70000 embeddings...
+Insert times over 10000 embeddings: 0.013335479617118836 ± 0.0017547843773791383 seconds
+Inserting 80000 embeddings...
+Insert times over 10000 embeddings: 0.01326951503753662 ± 0.0022488133715509494 seconds
+Inserting 90000 embeddings...
+Insert times over 10000 embeddings: 0.013202685856819153 ± 0.0015293112540850687 seconds
+Inserting 100000 embeddings...
+Insert times over 10000 embeddings: 0.01325765917301178 ± 0.002060756274870232 seconds
+
+Search times for 1000 queries: 0.05896414399147034 ± 0.01322378063261405 seconds
+```
+
+### LSH(Locality-Sensitive Hashing)
+
+```sh
+python postLSHstore.py
+```
+
+```
+Inserting 10000 embeddings...
+Insert times over 10000 embeddings: 0.011870080924034118 ± 0.0025198901308637685 seconds
+Inserting 20000 embeddings...
+Insert times over 10000 embeddings: 0.012624620509147644 ± 0.0032029123330840595 seconds
+Inserting 30000 embeddings...
+Insert times over 10000 embeddings: 0.024018246960639953 ± 1.0248020795409534 seconds
+Inserting 40000 embeddings...
+Insert times over 10000 embeddings: 0.011922398781776429 ± 0.012237047499576322 seconds
+Inserting 50000 embeddings...
+Insert times over 10000 embeddings: 0.010793326091766357 ± 0.00315735712152924 seconds
+Inserting 60000 embeddings...
+Insert times over 10000 embeddings: 0.011347979879379272 ± 0.020144231930742974 seconds
+Inserting 70000 embeddings...
+Insert times over 10000 embeddings: 0.012097431182861327 ± 0.01668503632417757 seconds
+Inserting 80000 embeddings...
+Insert times over 10000 embeddings: 0.011377539825439454 ± 0.0016816709903827768 seconds
+Inserting 90000 embeddings...
+Insert times over 10000 embeddings: 0.011382179951667785 ± 0.004793019868135286 seconds
+Inserting 100000 embeddings...
+Insert times over 10000 embeddings: 0.011358406710624694 ± 0.005604911395437017 seconds
+```
+
+
+```sh
+python postLSHsearch.py
+```
+
+```
+Search times for 10000 queries: 0.01549175112247467 ± 0.0012841886448967997 seconds
+Search times for 20000 queries: 0.016615263557434083 ± 0.006843545815597204 seconds
+Search times for 30000 queries: 0.015955161428451537 ± 0.002753508182131156 seconds
+Search times for 40000 queries: 0.015576725387573242 ± 0.0010069969501449879 seconds
+Search times for 50000 queries: 0.01604475727081299 ± 0.0031412030589864997 seconds
+Search times for 60000 queries: 0.015705189394950865 ± 0.0025789618758723875 seconds
+Search times for 70000 queries: 0.01568776502609253 ± 0.0009963819037709667 seconds
+Search times for 80000 queries: 0.015623391056060792 ± 0.0009489477719469815 seconds
+Search times for 90000 queries: 0.015694198966026307 ± 0.001048286723438669 seconds
+Search times for 100000 queries: 0.015669856858253478 ± 0.0009775364733532067 seconds
 ```
