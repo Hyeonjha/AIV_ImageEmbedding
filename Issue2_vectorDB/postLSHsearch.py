@@ -1,9 +1,11 @@
-import time
+import os
 import numpy as np
+from PIL import Image
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-from ImageEmbedding import ImageEmbedding, Base
 from datasketch import MinHash, MinHashLSH
+from Img2Vec import Img2Vec
+from ImageEmbedding import ImageEmbedding, Base
 
 # PostgreSQL 설정
 DATABASE_URL = "postgresql://postgres:aiv11011@localhost:5432/postgres"
@@ -14,47 +16,73 @@ Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-def generate_random_embeddings(num_embeddings, dim=1000):
-    return [np.random.rand(dim).tolist() for _ in range(num_embeddings)]
-
-def lsh_setup(embeddings, num_perm=128):
-    lsh = MinHashLSH(threshold=0.8, num_perm=num_perm)
-    for i, embedding in enumerate(embeddings):
-        m = MinHash(num_perm=num_perm)
-        for d in embedding:
-            m.update(str(d).encode('utf8'))
-        lsh.insert(f"embedding_{i}", m)
-    return lsh
+def convert_embedding_to_minhash(embedding, num_perm=128):
+    m = MinHash(num_perm=num_perm)
+    for value in embedding:
+        m.update(str(value).encode('utf8'))
+    return m
 
 def find_similar_lsh(lsh, query_embedding, num_perm=128):
-    m = MinHash(num_perm=num_perm)
-    for d in query_embedding:
-        m.update(str(d).encode('utf8'))
+    m = convert_embedding_to_minhash(query_embedding, num_perm)
+    print(f"MinHash for query: {m.hashvalues[:10]}")  # 디버깅용 출력
+    print(f"lsh.q : {lsh.query(m)}") # 여기부터 출력 안됨 ->>>> lsh.q : []
     return lsh.query(m)
 
-def measure_search_time(session, lsh, threshold=0.8, top_n=5, total_tests=100000, dim=1000, num_perm=128):
-    search_times = []
-    random_embeddings = [np.random.rand(dim).tolist() for _ in range(total_tests)]
+def find_similar_images(input_image_path, session, lsh, num_perm=128, top_n=5):
+    print("Start finding similar images")
+    img = Image.open(input_image_path).convert('RGB')
+    img2vec = Img2Vec()
+    input_embedding = img2vec.get_vec(img).tolist()
+    
+    print(f"Input embedding: {input_embedding[:10]}")  # 입력 벡터의 일부를 출력
+    
+    lsh_results = find_similar_lsh(lsh, input_embedding, num_perm=num_perm)
+    results = []
+    print(f"LSH results: {lsh_results}")    # LSH results: []
+    if lsh_results:
+        lsh_results_placeholders = ', '.join([':result' + str(i) for i in range(len(lsh_results))])
+        query = text(f"""
+            SELECT image_path, label, embedding, 1 - (embedding_vector <=> '[{','.join(map(str, input_embedding))}]'::vector) AS similarity
+            FROM image_embeddings
+            WHERE image_path IN ({lsh_results_placeholders})
+            ORDER BY similarity DESC
+            LIMIT :top_n;
+        """)
+        params = {'top_n': top_n}
+        for i, result in enumerate(lsh_results):
+            params['result' + str(i)] = result
 
-    for idx, random_embedding in enumerate(random_embeddings):
-        start_time = time.time()
-        find_similar_lsh(lsh, random_embedding, num_perm=num_perm)
-        end_time = time.time()
-        search_times.append(end_time - start_time)
-        
-        if (idx + 1) % 10000 == 0:
-            search_times_np = np.array(search_times)
-            print(f"Search times for {idx + 1} queries: {search_times_np.mean()} ± {search_times_np.std()} seconds")
-            search_times = []  # Reset for the next batch
+        print("Before executing DB query")
+        db_results = session.execute(query, params).fetchall()
+        print("After executing DB query")
+        if db_results:
+            for db_result in db_results:
+                results.append((db_result.image_path, db_result.label, db_result.similarity))
+                print(f"Query Result: {db_result.image_path}, Similarity: {db_result.similarity:.4f}")  # 쿼리 결과를 출력하여 확인
+        else:
+            print("No DB results found")
 
-    return search_times_np.mean(), search_times_np.std()
+    results.sort(key=lambda x: x[2], reverse=True)
+    return results[:top_n]
 
 if __name__ == "__main__":
-    # 임베딩을 생성하고 LSH에 삽입하는 단계는 생략, 이 단계는 postInsert.py에서 수행됨
-    total_embeddings = 100000
-    num_perm = 128
+    input_image_path = 'data-gatter/test/bubble_380033.jpg'
+    
+    lsh = MinHashLSH(threshold=0.8, num_perm=128)  # 임계값 조정
+    
+    # Load existing embeddings into LSH
+    embeddings = session.query(ImageEmbedding).all()
+    print(f"Number of embeddings loaded: {len(embeddings)}")
+    for embedding in embeddings:
+        m = convert_embedding_to_minhash(embedding.embedding, num_perm=128)
+        lsh.insert(embedding.image_path, m)
+        #print(f"Inserted {embedding.image_path} into LSH")
 
-    embeddings = generate_random_embeddings(total_embeddings)
-    lsh = lsh_setup(embeddings, num_perm=num_perm)
+    # Print all keys in LSH
+    #print(f"Keys in LSH: {list(lsh.keys)}")
+    
+    similar_images = find_similar_images(input_image_path, session, lsh, num_perm=128, top_n=5)
+    print("End finding")
 
-    measure_search_time(session, lsh, total_tests=100000, num_perm=num_perm)
+    for image_path, label, similarity in similar_images:
+        print(f"Image Path: {image_path}, Label: {label}, Similarity: {similarity:.4f}")

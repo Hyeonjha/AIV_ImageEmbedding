@@ -54,7 +54,7 @@ if __name__ == "__main__":
     # 임베딩을 생성하고 LSH에 삽입하는 단계는 생략, 이 단계는 postInsert.py에서 수행됨
     total_embeddings = 100000
     num_perm = 128
-
+  
     embeddings = generate_random_embeddings(total_embeddings)
     lsh = lsh_setup(embeddings, num_perm=num_perm)
 
