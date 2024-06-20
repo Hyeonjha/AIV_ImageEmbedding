@@ -17,8 +17,8 @@ Issue2_vectorDB/
 ├── postgreSim.py
 ├── postInsertV.py
 ├── postSearchT.py
-├── postLSHstore.py
-├── postLSHsearch.py
+├── postLSHstorePerf.py.py
+├── postLSHsearchPerf.py
 ├── requirements.txt
 └── README.md
 ```
@@ -191,13 +191,13 @@ fake vector 생성하여 10만개의 데이터 저장하는 모델의 성능 평
 
 10만개의 데이터 검색하는 모델의 성능 평가
 
-### postLSHstore.py
+### postLSHstorePerf.py.py
 
-기존 저장 방식에서 LSH에 저장하는 방식으로 업데이트. 데이터 저장 성능 평가
+기존 저장 방식에서 LSH에 저장하는 방식으로 업데이트. fake vector 생성하여 데이터 저장 성능 평가
 
-### postLSHsearch.py
+### postLSHsearchPerf.py
 
-기존 저장 방식에서 LSH에 저장하는 방식으로 업데이트. 데이터 검색 성능 평가
+기존 저장 방식에서 LSH에 저장하는 방식으로 업데이트. fake vector 생성하여 데이터 검색 성능 평가
 
 ### requirements.txt
 
@@ -297,7 +297,7 @@ Search times for 1000 queries: 0.05896414399147034 ± 0.01322378063261405 second
 ### LSH(Locality-Sensitive Hashing)
 
 ```sh
-python postLSHstore.py
+python postLSHstorePerf.py
 ```
 
 ```
@@ -325,7 +325,7 @@ Insert times over 10000 embeddings: 0.011358406710624694 ± 0.005604911395437017
 
 
 ```sh
-python postLSHsearch.py
+python postLSHsearchPerf.py
 ```
 
 ```
