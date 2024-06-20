@@ -17,8 +17,14 @@ Issue2_vectorDB/
 ├── postgreSim.py
 ├── postInsertV.py
 ├── postSearchT.py
-├── postLSHstorePerf.py.py
+├── postLSHstorePerf.py
 ├── postLSHsearchPerf.py
+├── postLSHstore.py
+├── postLSHsearch.py
+├── postHNSWfind.py
+├── postHNSWinsert.py
+├── HNSWfindPerf.py
+├── HNSWinsertPerf.py
 ├── requirements.txt
 └── README.md
 ```
@@ -145,6 +151,24 @@ python postSearchT.py
 python postgreSim.py
 ```
 
+### 4. 검색 속도 개선 ( GIST -> LSH -> HNSW )
+
+기존의 코드에서 검색 속도가 느린 부분을 개선하기 위해 GIST, LSH, HNSW를 사용. (최종 : HNSW)
+
+```sh
+python postLSHstorePerf.py
+python postLSHsearchPerf.py
+python postLSHstore.py
+python postLSHsearch.py
+```
+
+```sh
+python postHNSWfind.py
+python postHNSWinsert.py
+python HNSWfindPerf.py
+python HNSWinsertPerf.py
+```
+
 ## 파일 설명
 
 ### docker-compose.yml
@@ -191,13 +215,37 @@ fake vector 생성하여 10만개의 데이터 저장하는 모델의 성능 평
 
 10만개의 데이터 검색하는 모델의 성능 평가
 
-### postLSHstorePerf.py.py
+### postLSHstorePerf.py
 
-기존 저장 방식에서 LSH에 저장하는 방식으로 업데이트. fake vector 생성하여 데이터 저장 성능 평가
+기존 저장 방식에서 LSH에 저장하는 방식으로 업데이트. fake vector 생성하여 데이터 저장 성능 평가 
 
 ### postLSHsearchPerf.py
 
 기존 저장 방식에서 LSH에 저장하는 방식으로 업데이트. fake vector 생성하여 데이터 검색 성능 평가
+
+### postLSHstore.py
+
+기존 방식에서 LSH로 업데이트 - 실제 이미지 데이터 저장 코드
+
+### postLSHsearch.py
+
+기존 방식에서 LSH로 업데이트 - 실제 이미지 데이터 검색 코드
+
+### HNSWinsertPerf.py
+
+기존 저장 방식에서 HNSW 알고리즘 사용방식으로 업데이트. fake vector 생성하여 데이터 저장 성능 평가 
+
+### HNSWfindPerf.py
+
+기존 저장 방식에서 HNSW 알고리즘 사용방식으로 업데이트. fake vector 생성하여 데이터 검색 성능 평가
+
+### postHNSWinsert.py
+
+기존 방식에서 HNSW 알고리즘 업데이트 - 실제 이미지 데이터 저장 코드
+
+### postHNSWfind.py
+
+기존 방식에서 HNSW 알고리즘 업데이트 - 실제 이미지 데이터 검색 코드
 
 ### requirements.txt
 
@@ -294,7 +342,7 @@ Insert times over 10000 embeddings: 0.01325765917301178 ± 0.002060756274870232 
 Search times for 1000 queries: 0.05896414399147034 ± 0.01322378063261405 seconds
 ```
 
-### LSH(Locality-Sensitive Hashing)
+### LSH(Locality-Sensitive Hashing) -->> result error
 
 ```sh
 python postLSHstorePerf.py
@@ -329,6 +377,7 @@ python postLSHsearchPerf.py
 ```
 
 ```
+검색 시 error -> 고쳐야 함
 Search times for 10000 queries: 0.01549175112247467 ± 0.0012841886448967997 seconds
 Search times for 20000 queries: 0.016615263557434083 ± 0.006843545815597204 seconds
 Search times for 30000 queries: 0.015955161428451537 ± 0.002753508182131156 seconds
@@ -340,3 +389,53 @@ Search times for 80000 queries: 0.015623391056060792 ± 0.0009489477719469815 se
 Search times for 90000 queries: 0.015694198966026307 ± 0.001048286723438669 seconds
 Search times for 100000 queries: 0.015669856858253478 ± 0.0009775364733532067 seconds
 ```
+
+### HNSW
+
+```sh
+python HNSWinsertPerf.py
+```
+
+```
+Inserting 10000 embeddings...
+Insert times over 10000 embeddings: 0.009714061450958251 ± 0.0028533289559459383 seconds
+Inserting 20000 embeddings...
+Insert times over 10000 embeddings: 0.009527180123329163 ± 0.0016754687110578984 seconds
+Inserting 30000 embeddings...
+Insert times over 10000 embeddings: 0.009725466609001159 ± 0.002710057932984796 seconds
+Inserting 40000 embeddings...
+Insert times over 10000 embeddings: 0.009865274024009704 ± 0.0024887662027976553 seconds
+Inserting 50000 embeddings...
+Insert times over 10000 embeddings: 0.009631681990623473 ± 0.0020928812317590017 seconds
+Inserting 60000 embeddings...
+Insert times over 10000 embeddings: 0.009735783648490906 ± 0.0021875225940249645 seconds
+Inserting 70000 embeddings...
+Insert times over 10000 embeddings: 0.00970157196521759 ± 0.003418452778373024 seconds
+Inserting 80000 embeddings...
+Insert times over 10000 embeddings: 0.010224883794784546 ± 0.0032901747785833713 seconds
+Inserting 90000 embeddings...
+Insert times over 10000 embeddings: 0.009743905162811279 ± 0.002305780842385575 seconds
+Inserting 100000 embeddings...
+Insert times over 10000 embeddings: 0.009627681875228881 ± 0.0027056482820152173 seconds
+HNSW index created and saved to 'hnsw_index.bin'
+```
+
+
+```sh
+python HNSWfindPerf.py
+```
+
+```
+Search times for batch 10000: 0.00032954392433166504 ± 6.964135275123236e-05 seconds
+Search times for batch 20000: 0.00038621418476104735 ± 0.0011958601129773059 seconds
+Search times for batch 30000: 0.0003617649078369141 ± 0.0012234454739943092 seconds
+Search times for batch 40000: 0.00032183821201324465 ± 8.292580279550775e-05 seconds
+Search times for batch 50000: 0.00032471842765808103 ± 5.614353698087352e-05 seconds
+Search times for batch 60000: 0.00032751214504241944 ± 6.431411264166197e-05 seconds
+Search times for batch 70000: 0.000318647837638855 ± 5.053541921064265e-05 seconds
+Search times for batch 80000: 0.0003206585884094238 ± 5.593253236293331e-05 seconds
+Search times for batch 90000: 0.00032006371021270753 ± 6.387829651313786e-05 seconds
+Search times for batch 100000: 0.0003158594369888306 ± 5.1306217771606445e-05 seconds
+```
+
+
