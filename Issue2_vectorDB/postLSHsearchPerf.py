@@ -30,6 +30,7 @@ def find_similar_lsh(lsh, query_embedding, num_perm=128):
     m = MinHash(num_perm=num_perm)
     for d in query_embedding:
         m.update(str(d).encode('utf8'))
+        
     return lsh.query(m)
 
 def measure_search_time(session, lsh, threshold=0.8, top_n=5, total_tests=100000, dim=1000, num_perm=128):
