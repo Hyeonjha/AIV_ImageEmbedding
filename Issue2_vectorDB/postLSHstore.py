@@ -59,7 +59,7 @@ def save_image_embedding(folder_path, session, lsh, num_perm=128):
 if __name__ == "__main__":
     folder_path = 'data-gatter/train_L'
     
-    initialize_database(session)  # 데이터베이스 초기화
+    initialize_database(session)  # db 초기화
 
     lsh = MinHashLSH(threshold=0.8, num_perm=128)
     save_image_embedding(folder_path, session, lsh)
