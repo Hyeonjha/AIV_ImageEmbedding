@@ -241,12 +241,16 @@ Search times for 100 queries: 0.8379068636894226 ± 0.09632197552364523 seconds
 Search times for 1000 queries: 0.8289583191871643 ± 0.09643168655288632 seconds
 ```
 
-### 데이터 저장 방식 변경 - GIST
+## 데이터 저장 방식 변경 
+### GIST 
+10만개 저장 : 
 ```
 Inserting 10000 embeddings...
 Insert times over 10000 embeddings: 0.014438557243347168 ± 0.013971510376183268 seconds
-
+...
+```
 10만개 저장 후 검색
+```
 Search times for 1000 queries: 0.05896414399147034 ± 0.01322378063261405 seconds
 ```
 
@@ -274,7 +278,7 @@ Search times for 40000 queries: 0.015576725387573242 ± 0.0010069969501449879 se
 ...
 ```
 
-### HNSW
+### HNSW - 별도 hnsw index 파일 관리
 검색 속도 굉장히 빠름 but 별도 파일 관리 필요
 ```
 Inserting 10000 embeddings...
@@ -313,7 +317,7 @@ Search times for batch 90000: 0.00032006371021270753 ± 6.387829651313786e-05 se
 Search times for batch 100000: 0.0003158594369888306 ± 5.1306217771606445e-05 seconds
 ```
 
-### ivfflat
+### ivfflat index
 10,000개 저장, 검색 :
 ```
 Time taken to save batch 1: 78.52 seconds
@@ -342,9 +346,9 @@ Batch 1: Average search time: 1.5733 seconds, Standard deviation: 0.0576 seconds
 ```
 
 
-### hnsw
+### hnsw index
+100,000개 저장 :
 ```
-100,000개 저장
 Time taken to save batch 1: 77.0878 seconds
 Time taken to save batch 2: 96.9995 seconds
 Time taken to save batch 3: 78.9220 seconds
@@ -357,8 +361,9 @@ Time taken to save batch 9: 72.7419 seconds
 Time taken to save batch 10: 76.0370 seconds
 Average save time: 75.08 seconds
 Standard deviation of save time: 8.07 seconds
-
-
+```
+100,000개 저장 후 1,000개 검색
+```
 Image Path: fake_path_12777, Label: fake_label_7, Similarity: 0.8000
 Image Path: fake_path_60148, Label: fake_label_8, Similarity: 0.8006
 Image Path: fake_path_64901, Label: fake_label_1, Similarity: 0.8019
@@ -368,3 +373,7 @@ Image Path: fake_path_94967, Label: fake_label_7, Similarity: 0.8012
 Average search time for 1000 fake embeddings: 0.7079 seconds
 Standard deviation of search time: 0.0350 seconds
 ```
+
+
+### 최종 -> 크게 성능 개선 x
+### 개선시키려면 별도 파일 관리를 해야 하거나 벡터값을 변환하여 인덱스에 저장하는 방식 등을 사용해야 해서 데이터 많아질수록 효율적이지 x 
