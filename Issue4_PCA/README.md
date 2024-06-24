@@ -25,3 +25,10 @@
     ```
 
 이제 `weaviate_visualize.py`를 실행하면 PCA, t-SNE, UMAP, MDS, Isomap을 사용하여 차원 축소된 임베딩 벡터를 각각 시각화할 수 있습니다.
+
+
+![alt text](results/PCA_2D.png) ![alt text](results/PCA_3D.png)
+![alt text](results/t-SNE_2D.png) ![alt text](results/t-SNE_3D.png)
+![alt text](results/UMAP_2D.png) ![alt text](results/UMAP_3D.png)
+![alt text](results/MDS_2D.png) ![alt text](results/MDS_3D.png)
+![alt text](results/Isomap_2D.png) ![alt text](results/Isomap_3D.png)
