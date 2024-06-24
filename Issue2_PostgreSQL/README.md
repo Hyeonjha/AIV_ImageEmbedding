@@ -127,22 +127,8 @@ python postgreSim.py
 
 ### 4. 검색 속도 개선 시도
 GIST -> LSH -> HNSW(별도 인덱스파일 저장 방식) -> HNSW(데이터베이스 내부에 저장, 인덱스 변환 필요) -> DB 제공 index(ivfflat, hnsw) 
+=> 성능 개선 X
 
-기존의 코드에서 검색 속도가 느린 부분을 개선하기 위해 GIST, LSH, HNSW를 사용. (최종 : HNSW)
-
-```sh
-python postLSHstorePerf.py
-python postLSHsearchPerf.py
-python postLSHstore.py
-python postLSHsearch.py
-```
-
-```sh
-python postHNSWfind.py
-python postHNSWinsert.py
-python HNSWfindPerf.py
-python HNSWinsertPerf.py
-```
 
 ## 파일 설명
 
@@ -174,6 +160,10 @@ SQLAlchemy를 사용하여 데이터베이스 테이블을 정의하는 파일. 
 
 데이터베이스에서 유사한 이미지를 검색하는 스크립트.
 
+### postgreSim.py
+
+PostgreSQL에서 계산한 유사도 값과 수동으로 계산한 코사인 유사도 값을 비교하는 스크립트.
+
 ### postInsertV.py
 
 fake vector 생성하여 10만개의 벡터를 데이터베이스에 저장하고 삽입 성능을 측정하는 스크립트.
@@ -195,7 +185,7 @@ fake vector 생성하여 10만개의 벡터를 데이터베이스에 저장하�
 
 ## 성능 평가
 
-### 임베딩 저장, 검색 성능 평가 실행 (10,000개) 
+### 임베딩 저장, 검색 성능 평가 실행 (10,000개 저장, 검색) 
 
 출력 결과:
 
@@ -205,7 +195,7 @@ Insert times over 10000 embeddings: 0.009964231491088868 ± 0.001589536077602844
 Search times over 10000 iterations: 0.05208480780124664 ± 0.004131978767582321 seconds
 ```
 
-### 임베딩 저장 성능 평가 실행 (10만개의 fake vector 생성 후 저장, 검색 -> 10,000개 단위)
+### 임베딩 저장 성능 평가 실행 (10만개의 fake vector 생성 후 저장 -> 10,000개 단위)
 
 ```sh
 python postInsertV.py
@@ -236,7 +226,7 @@ Inserting 100000 embeddings...
 Insert times over 10000 embeddings: 0.01068202040195465 ± 0.0037268060481944892 seconds
 ```
 
-### 검색 성능 평가 실행
+### 검색 성능 평가 실행 (10만개의 fake vector 저장된 상태에서 검색 -> 10,000개 단위)
 
 ```sh
 python postSearchT.py
@@ -253,37 +243,16 @@ Search times for 1000 queries: 0.8289583191871643 ± 0.09643168655288632 seconds
 
 ### 데이터 저장 방식 변경 - GIST
 ```
-GIST
 Inserting 10000 embeddings...
 Insert times over 10000 embeddings: 0.014438557243347168 ± 0.013971510376183268 seconds
-Inserting 20000 embeddings...
-Insert times over 10000 embeddings: 0.014118605327606202 ± 0.007282303888130275 seconds
-Inserting 30000 embeddings...
-Insert times over 10000 embeddings: 0.01362208206653595 ± 0.0032048428731961294 seconds
-Inserting 40000 embeddings...
-Insert times over 10000 embeddings: 0.01344443953037262 ± 0.0021838547421636216 seconds
-Inserting 50000 embeddings...
-Insert times over 10000 embeddings: 0.013214104318618775 ± 0.0015636945214204784 seconds
-Inserting 60000 embeddings...
-Insert times over 10000 embeddings: 0.013265347409248352 ± 0.0019140397095729427 seconds
-Inserting 70000 embeddings...
-Insert times over 10000 embeddings: 0.013335479617118836 ± 0.0017547843773791383 seconds
-Inserting 80000 embeddings...
-Insert times over 10000 embeddings: 0.01326951503753662 ± 0.0022488133715509494 seconds
-Inserting 90000 embeddings...
-Insert times over 10000 embeddings: 0.013202685856819153 ± 0.0015293112540850687 seconds
-Inserting 100000 embeddings...
-Insert times over 10000 embeddings: 0.01325765917301178 ± 0.002060756274870232 seconds
 
+10만개 저장 후 검색
 Search times for 1000 queries: 0.05896414399147034 ± 0.01322378063261405 seconds
 ```
 
-### LSH(Locality-Sensitive Hashing) -->> result error
+### LSH(Locality-Sensitive Hashing) -->> 실제 이미지 임베딩 후 검색 시 error
 
-```sh
-python postLSHstorePerf.py
-```
-
+10만개 저장 결과 : 
 ```
 Inserting 10000 embeddings...
 Insert times over 10000 embeddings: 0.011870080924034118 ± 0.0025198901308637685 seconds
@@ -293,45 +262,20 @@ Inserting 30000 embeddings...
 Insert times over 10000 embeddings: 0.024018246960639953 ± 1.0248020795409534 seconds
 Inserting 40000 embeddings...
 Insert times over 10000 embeddings: 0.011922398781776429 ± 0.012237047499576322 seconds
-Inserting 50000 embeddings...
-Insert times over 10000 embeddings: 0.010793326091766357 ± 0.00315735712152924 seconds
-Inserting 60000 embeddings...
-Insert times over 10000 embeddings: 0.011347979879379272 ± 0.020144231930742974 seconds
-Inserting 70000 embeddings...
-Insert times over 10000 embeddings: 0.012097431182861327 ± 0.01668503632417757 seconds
-Inserting 80000 embeddings...
-Insert times over 10000 embeddings: 0.011377539825439454 ± 0.0016816709903827768 seconds
-Inserting 90000 embeddings...
-Insert times over 10000 embeddings: 0.011382179951667785 ± 0.004793019868135286 seconds
-Inserting 100000 embeddings...
-Insert times over 10000 embeddings: 0.011358406710624694 ± 0.005604911395437017 seconds
+...
 ```
 
-
-```sh
-python postLSHsearchPerf.py
+10만개 저장 후 검색(fake vector 평가 시) -> 실제 이미지 임베딩 error
 ```
-
-```
-검색 시 error -> 고쳐야 함
 Search times for 10000 queries: 0.01549175112247467 ± 0.0012841886448967997 seconds
 Search times for 20000 queries: 0.016615263557434083 ± 0.006843545815597204 seconds
 Search times for 30000 queries: 0.015955161428451537 ± 0.002753508182131156 seconds
 Search times for 40000 queries: 0.015576725387573242 ± 0.0010069969501449879 seconds
-Search times for 50000 queries: 0.01604475727081299 ± 0.0031412030589864997 seconds
-Search times for 60000 queries: 0.015705189394950865 ± 0.0025789618758723875 seconds
-Search times for 70000 queries: 0.01568776502609253 ± 0.0009963819037709667 seconds
-Search times for 80000 queries: 0.015623391056060792 ± 0.0009489477719469815 seconds
-Search times for 90000 queries: 0.015694198966026307 ± 0.001048286723438669 seconds
-Search times for 100000 queries: 0.015669856858253478 ± 0.0009775364733532067 seconds
+...
 ```
 
 ### HNSW
-
-```sh
-python HNSWinsertPerf.py
-```
-
+검색 속도 굉장히 빠름 but 별도 파일 관리 필요
 ```
 Inserting 10000 embeddings...
 Insert times over 10000 embeddings: 0.009714061450958251 ± 0.0028533289559459383 seconds
@@ -356,11 +300,6 @@ Insert times over 10000 embeddings: 0.009627681875228881 ± 0.002705648282015217
 HNSW index created and saved to 'hnsw_index.bin'
 ```
 
-
-```sh
-python HNSWfindPerf.py
-```
-
 ```
 Search times for batch 10000: 0.00032954392433166504 ± 6.964135275123236e-05 seconds
 Search times for batch 20000: 0.00038621418476104735 ± 0.0011958601129773059 seconds
@@ -374,100 +313,15 @@ Search times for batch 90000: 0.00032006371021270753 ± 6.387829651313786e-05 se
 Search times for batch 100000: 0.0003158594369888306 ± 5.1306217771606445e-05 seconds
 ```
 
-### NEW
-```
-Processed 0/1000 vectors
-Processed 100/1000 vectors
-Processed 200/1000 vectors
-Processed 300/1000 vectors
-Processed 400/1000 vectors
-Processed 500/1000 vectors
-Processed 600/1000 vectors
-Processed 700/1000 vectors
-Processed 800/1000 vectors
-Processed 900/1000 vectors
-Search - Average Time: 0.096277 seconds, Standard Deviation: 0.010317 seconds
-Sample search results:
-Image Path: fake_path_2770, Label: fake_label, Similarity: 0.7761
-Image Path: fake_path_3697, Label: fake_label, Similarity: 0.7760
-Image Path: fake_path_4154, Label: fake_label, Similarity: 0.7757
-Image Path: fake_path_901, Label: fake_label, Similarity: 0.7749
-Image Path: fake_path_6747, Label: fake_label, Similarity: 0.7747
-```
-
-### hnsw - pgvector 확장
-```
-Insert times over 10000 embeddings: 0.01074881341457367 ± 0.0024986491542189865 seconds
-
-Search - Average Time: 0.135723 seconds, Standard Deviation: 0.035065 seconds
-```
-
-### ivflat
-```
-Insertion - Average Time: 0.010562 seconds, Standard Deviation: 0.002889 seconds
-
-Search - Average Time: 0.097074 seconds, Standard Deviation: 0.013535 seconds
-```
-
-Insertion - Average Time: 0.014123 seconds, Standard Deviation: 0.003600 seconds
-
-
-### hnsw update - 10,000개
-```
-Insertion - Average Time: 0.010981 seconds, Standard Deviation: 0.004142 seconds
-
-Search - Average Time: 0.007773 seconds, Standard Deviation: 0.000531 seconds
-Sample search results:
-Image Path: fake_path_299, Label: fake_label, Similarity: 0.7788
-Image Path: fake_path_1129, Label: fake_label, Similarity: 0.7704
-Image Path: fake_path_2095, Label: fake_label, Similarity: 0.7692
-Image Path: fake_path_3925, Label: fake_label, Similarity: 0.7685
-Image Path: fake_path_6549, Label: fake_label, Similarity: 0.7676
-
-
-
-Insertion - Average Time: 0.013754 seconds, Standard Deviation: 0.003342 seconds
-
-Search - Average Time: 0.009929 seconds, Standard Deviation: 0.001555 seconds
-Sample search results:
-Image Path: fake_path_480, Label: fake_label, Similarity: 0.7836
-Image Path: fake_path_1043, Label: fake_label, Similarity: 0.7827
-Image Path: fake_path_1182, Label: fake_label, Similarity: 0.7801
-Image Path: fake_path_3447, Label: fake_label, Similarity: 0.7796
-Image Path: fake_path_8566, Label: fake_label, Similarity: 0.7779
-```
-
-### hnsw update - 100,000개
-```
-Insertion - 10000 vectors inserted
-Average Time: 0.013782 seconds, Standard Deviation: 0.005025 seconds
-Insertion - 20000 vectors inserted
-Average Time: 0.014143 seconds, Standard Deviation: 0.005612 seconds
-Insertion - 30000 vectors inserted
-Average Time: 0.014074 seconds, Standard Deviation: 0.022323 seconds
-Insertion - 40000 vectors inserted
-Average Time: 0.013736 seconds, Standard Deviation: 0.004743 seconds
-Insertion - 50000 vectors inserted
-Average Time: 0.013791 seconds, Standard Deviation: 0.003822 seconds
-Insertion - 60000 vectors inserted
-Average Time: 0.013546 seconds, Standard Deviation: 0.003580 seconds
-Insertion - 70000 vectors inserted
-Average Time: 0.013776 seconds, Standard Deviation: 0.003083 seconds
-Insertion - 80000 vectors inserted
-Average Time: 0.013357 seconds, Standard Deviation: 0.006796 seconds
-Insertion - 90000 vectors inserted
-Average Time: 0.013576 seconds, Standard Deviation: 0.002398 seconds
-Insertion - 100000 vectors inserted
-Average Time: 0.013870 seconds, Standard Deviation: 0.004057 seconds
-Insertion - Total Average Time: 0.013765 seconds, Standard Deviation: 0.008266 seconds
-```
-
 ### ivfflat
+10,000개 저장, 검색 :
 ```
 Time taken to save batch 1: 78.52 seconds
 Average search time: 0.0565 seconds, Standard deviation: 0.0147 seconds
+```
 
 100,000개 저장
+```
 Time taken to save batch 1: 69.14 seconds
 Time taken to save batch 2: 70.56 seconds
 Time taken to save batch 3: 82.84 seconds
@@ -480,8 +334,10 @@ Time taken to save batch 9: 76.65 seconds
 Time taken to save batch 10: 88.58 seconds
 Average save time: 73.04 seconds
 Standard deviation of save time: 7.08 seconds
+```
 
 100,000개 저장된 상태에서 100개 검색 
+```
 Batch 1: Average search time: 1.5733 seconds, Standard deviation: 0.0576 seconds
 ```
 
