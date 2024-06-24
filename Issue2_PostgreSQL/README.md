@@ -377,3 +377,4 @@ Standard deviation of search time: 0.0350 seconds
 
 ### 최종 -> 크게 성능 개선 x
 ### 개선시키려면 별도 파일 관리를 해야 하거나 벡터값을 변환하여 인덱스에 저장하는 방식 등을 사용해야 해서 데이터 많아질수록 효율적이지 x 
+### => weaviate 사용
