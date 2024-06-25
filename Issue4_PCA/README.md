@@ -28,17 +28,17 @@
 
 
 ![alt text](results/PCA_2D.png) ![alt text](results/PCA_3D.png)
-PCA 2D reduction time: 0.0333 seconds
+PCA 2D reduction time: 0.0333 seconds  ||
 PCA 3D reduction time: 0.0114 seconds
 ![alt text](results/t-SNE_2D.png) ![alt text](results/t-SNE_3D.png)
-t-SNE 2D reduction time: 0.7966 seconds
+t-SNE 2D reduction time: 0.7966 seconds  ||
 t-SNE 3D reduction time: 1.6408 seconds
 ![alt text](results/UMAP_2D.png) ![alt text](results/UMAP_3D.png)
-UMAP 2D reduction time: 7.7996 seconds
+UMAP 2D reduction time: 7.7996 seconds  ||
 UMAP 3D reduction time: 1.5023 seconds
 ![alt text](results/MDS_2D.png) ![alt text](results/MDS_3D.png)
 MDS 2D reduction time: 0.6734 seconds
 MDS 3D reduction time: 0.6665 seconds
 ![alt text](results/Isomap_2D.png) ![alt text](results/Isomap_3D.png)
-Isomap 2D reduction time: 0.0523 seconds
+Isomap 2D reduction time: 0.0523 seconds  ||
 Isomap 3D reduction time: 0.0263 seconds
