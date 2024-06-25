@@ -1,11 +1,14 @@
 # dimension_reduction.py
-import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE, MDS, Isomap
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 import umap
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+import tensorflow as tf
+from sklearn.decomposition import FactorAnalysis
+from sklearn.decomposition import KernelPCA
+
 
 # n_components -> 보통 2 또는 3으로 설정하여 2D/3D로 시각화
 
@@ -43,6 +46,36 @@ def normalize_embeddings(embeddings):
     scaler = StandardScaler()
     normalized_embeddings = scaler.fit_transform(embeddings)
     return normalized_embeddings
+
+def reduce_dimensions_lda(embeddings, labels, n_components=2):
+    lda = LDA(n_components=n_components)
+    reduced_embeddings = lda.fit_transform(embeddings, labels)
+    return reduced_embeddings
+
+def reduce_dimensions_autoencoder(embeddings, encoding_dim=2, epochs=50, batch_size=256):
+    input_dim = embeddings.shape[1]
+    input_img = tf.keras.layers.Input(shape=(input_dim,))
+    encoded = tf.keras.layers.Dense(encoding_dim, activation='relu')(input_img)
+    decoded = tf.keras.layers.Dense(input_dim, activation='sigmoid')(encoded)
+    
+    autoencoder = tf.keras.models.Model(input_img, decoded)
+    encoder = tf.keras.models.Model(input_img, encoded)
+    
+    autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
+    autoencoder.fit(embeddings, embeddings, epochs=epochs, batch_size=batch_size, shuffle=True, verbose=0)
+    
+    reduced_embeddings = encoder.predict(embeddings)
+    return reduced_embeddings
+
+def reduce_dimensions_fa(embeddings, n_components=2):
+    fa = FactorAnalysis(n_components=n_components)
+    reduced_embeddings = fa.fit_transform(embeddings)
+    return reduced_embeddings
+
+def reduce_dimensions_kernel_pca(embeddings, n_components=2, kernel='rbf'):
+    kpca = KernelPCA(n_components=n_components, kernel=kernel)
+    reduced_embeddings = kpca.fit_transform(embeddings)
+    return reduced_embeddings
 
 def plot_embeddings_2d(embeddings, labels, title='Embedding Visualization'):
     label_encoder = LabelEncoder()

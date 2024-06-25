@@ -15,6 +15,10 @@ from dimension_reduction import (
     reduce_dimensions_umap,
     reduce_dimensions_mds,
     reduce_dimensions_isomap,
+    reduce_dimensions_lda,
+    reduce_dimensions_autoencoder,
+    reduce_dimensions_fa,
+    reduce_dimensions_kernel_pca,
     normalize_embeddings,
     plot_embeddings_2d,
     plot_embeddings_3d
@@ -85,6 +89,26 @@ if __name__ == "__main__":
     plot_embeddings_2d(isomap_embeddings, labels, title='Isomap 2D Visualization')
     print(f"Isomap 2D reduction time: {isomap_time:.4f} seconds")
 
+    # LDA 차원 축소 및 시각화
+    lda_embeddings, lda_time = measure_time(reduce_dimensions_lda, normalized_embeddings, labels, n_components=2)
+    plot_embeddings_2d(lda_embeddings, labels, title='LDA 2D Visualization')
+    print(f"LDA 2D reduction time: {lda_time:.4f} seconds")
+
+    # Autoencoders 차원 축소 및 시각화
+    autoencoder_embeddings, autoencoder_time = measure_time(reduce_dimensions_autoencoder, normalized_embeddings, encoding_dim=2)
+    plot_embeddings_2d(autoencoder_embeddings, labels, title='Autoencoders 2D Visualization')
+    print(f"Autoencoders 2D reduction time: {autoencoder_time:.4f} seconds")
+
+    # Factor Analysis 차원 축소 및 시각화
+    fa_embeddings, fa_time = measure_time(reduce_dimensions_fa, normalized_embeddings, n_components=2)
+    plot_embeddings_2d(fa_embeddings, labels, title='Factor Analysis 2D Visualization')
+    print(f"Factor Analysis 2D reduction time: {fa_time:.4f} seconds")
+
+    # Kernel PCA 차원 축소 및 시각화
+    kernel_pca_embeddings, kernel_pca_time = measure_time(reduce_dimensions_kernel_pca, normalized_embeddings, n_components=2)
+    plot_embeddings_2d(kernel_pca_embeddings, labels, title='Kernel PCA 2D Visualization')
+    print(f"Kernel PCA 2D reduction time: {kernel_pca_time:.4f} seconds")
+
     # 3D Visualizations with Time Measurement
     # PCA 차원 축소 및 시각화
     pca_embeddings_3d, pca_time_3d = measure_time(reduce_dimensions_pca, normalized_embeddings, n_components=3)
@@ -110,3 +134,23 @@ if __name__ == "__main__":
     isomap_embeddings_3d, isomap_time_3d = measure_time(reduce_dimensions_isomap, normalized_embeddings, n_components=3)
     plot_embeddings_3d(isomap_embeddings_3d, labels, title='Isomap 3D Visualization')
     print(f"Isomap 3D reduction time: {isomap_time_3d:.4f} seconds")
+
+    # LDA 차원 축소 및 시각화
+    lda_embeddings_3d, lda_time_3d = measure_time(reduce_dimensions_lda, normalized_embeddings, labels, n_components=3)
+    plot_embeddings_3d(lda_embeddings_3d, labels, title='LDA 3D Visualization')
+    print(f"LDA 3D reduction time: {lda_time_3d:.4f} seconds")
+
+    # Autoencoders 차원 축소 및 시각화
+    autoencoder_embeddings_3d, autoencoder_time_3d = measure_time(reduce_dimensions_autoencoder, normalized_embeddings, encoding_dim=3)
+    plot_embeddings_3d(autoencoder_embeddings_3d, labels, title='Autoencoders 3D Visualization')
+    print(f"Autoencoders 3D reduction time: {autoencoder_time_3d:.4f} seconds")
+
+    # Factor Analysis 차원 축소 및 시각화
+    fa_embeddings_3d, fa_time_3d = measure_time(reduce_dimensions_fa, normalized_embeddings, n_components=3)
+    plot_embeddings_3d(fa_embeddings_3d, labels, title='Factor Analysis 3D Visualization')
+    print(f"Factor Analysis 3D reduction time: {fa_time_3d:.4f} seconds")
+
+    # Kernel PCA 차원 축소 및 시각화
+    kernel_pca_embeddings_3d, kernel_pca_time_3d = measure_time(reduce_dimensions_kernel_pca, normalized_embeddings, n_components=3)
+    plot_embeddings_3d(kernel_pca_embeddings_3d, labels, title='Kernel PCA 3D Visualization')
+    print(f"Kernel PCA 3D reduction time: {kernel_pca_time_3d:.4f} seconds")
