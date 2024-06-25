@@ -63,7 +63,7 @@ if __name__ == "__main__":
         end_time = time.time()
         return result, end_time - start_time
     
-    # 2D Visualizations with Time Measurement
+    ### 2D Visualizations with Time Measurement
     # PCA 차원 축소 및 시각화
     pca_embeddings, pca_time = measure_time(reduce_dimensions_pca, normalized_embeddings, n_components=2)
     plot_embeddings_2d(pca_embeddings, labels, title='PCA 2D Visualization')
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     plot_embeddings_2d(kernel_pca_embeddings, labels, title='Kernel PCA 2D Visualization')
     print(f"Kernel PCA 2D reduction time: {kernel_pca_time:.4f} seconds")
 
-    # 3D Visualizations with Time Measurement
+    ### 3D Visualizations with Time Measurement
     # PCA 차원 축소 및 시각화
     pca_embeddings_3d, pca_time_3d = measure_time(reduce_dimensions_pca, normalized_embeddings, n_components=3)
     plot_embeddings_3d(pca_embeddings_3d, labels, title='PCA 3D Visualization')
