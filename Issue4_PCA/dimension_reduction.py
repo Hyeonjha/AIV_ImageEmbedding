@@ -7,17 +7,23 @@ import umap
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-def reduce_dimensions_pca(embeddings, n_components=3):
+# n_components -> 보통 2 또는 3으로 설정하여 2D/3D로 시각화
+
+def reduce_dimensions_pca(embeddings, n_components=3):  
     pca = PCA(n_components=n_components)
     reduced_embeddings = pca.fit_transform(embeddings)
     return reduced_embeddings
 
-def reduce_dimensions_tsne(embeddings, n_components=3, perplexity=30, n_iter=1000):
+# perplexity : 데이터 포인트 주변의 지역 밀도를 조절하는 값. (보통 5 ~ 50. 커지면 더 큰 데이터 세트에 대해 잘 동작, 작으면 지역구조 더 잘 반영 but 노이즈에 더 민감) 
+# n_iter : 최적화를 위한 반복 횟수 (보통 300 ~ 1000) - 더 많은 반복 통해 최적화 but 계산 시간 길어짐
+def reduce_dimensions_tsne(embeddings, n_components=3, perplexity=10, n_iter=1000):
     tsne = TSNE(n_components=n_components, perplexity=perplexity, n_iter=n_iter, random_state=42)
     reduced_embeddings = tsne.fit_transform(embeddings)
     return reduced_embeddings
 
-def reduce_dimensions_umap(embeddings, n_components=3, n_neighbors=15, min_dist=0.1):
+# n_neighbors : 각 데이터 포인트에 대한 근접 이웃의 수 (클수록 전반적인 구조 잘 반영, 작을수록 국부적 구조 잘 반영) 15
+# min_dist : 임베딩 공간에서 최소 거리. 클러스터의 밀도에 영향을 미침 (작을수록 클러스터가 더 조밀하게 모이고, 클수록 분산) 0.1
+def reduce_dimensions_umap(embeddings, n_components=3,  n_neighbors=20, min_dist=0.4):  ### n_neighbors -> # of class 
     reducer = umap.UMAP(n_components=n_components, n_neighbors=n_neighbors, min_dist=min_dist, random_state=42)
     reduced_embeddings = reducer.fit_transform(embeddings)
     return reduced_embeddings
@@ -27,7 +33,8 @@ def reduce_dimensions_mds(embeddings, n_components=3):
     reduced_embeddings = mds.fit_transform(embeddings)
     return reduced_embeddings
 
-def reduce_dimensions_isomap(embeddings, n_components=3, n_neighbors=5):
+# n_neighbors : 각 데이터 포인트에 대한 근접 이웃의 수 
+def reduce_dimensions_isomap(embeddings, n_components=3, n_neighbors=12):
     isomap = Isomap(n_components=n_components, n_neighbors=n_neighbors)
     reduced_embeddings = isomap.fit_transform(embeddings)
     return reduced_embeddings

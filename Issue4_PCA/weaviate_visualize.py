@@ -1,6 +1,7 @@
 # weaviate_visualize.py
 import sys
 import os
+import time
 
 # 필요한 모듈 경로를 추가
 issue2_openDB_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../Issue2_openDB'))
@@ -51,44 +52,61 @@ if __name__ == "__main__":
     embeddings, labels = fetch_all_embeddings(client)
     normalized_embeddings = normalize_embeddings(embeddings)
     
-    # 2D Visualizations
-    # PCA 차원 축소 및 시각화
-    pca_embeddings = reduce_dimensions_pca(normalized_embeddings, n_components=2)
-    plot_embeddings_2d(pca_embeddings, labels, title='PCA 2D Visualization')
-
-    # t-SNE 차원 축소 및 시각화
-    tsne_embeddings = reduce_dimensions_tsne(normalized_embeddings, n_components=2)
-    plot_embeddings_2d(tsne_embeddings, labels, title='t-SNE 2D Visualization')
-
-    # UMAP 차원 축소 및 시각화
-    umap_embeddings = reduce_dimensions_umap(normalized_embeddings, n_components=2)
-    plot_embeddings_2d(umap_embeddings, labels, title='UMAP 2D Visualization')
-
-    # MDS 차원 축소 및 시각화
-    mds_embeddings = reduce_dimensions_mds(normalized_embeddings, n_components=2)
-    plot_embeddings_2d(mds_embeddings, labels, title='MDS 2D Visualization')
-
-    # Isomap 차원 축소 및 시각화
-    isomap_embeddings = reduce_dimensions_isomap(normalized_embeddings, n_components=2)
-    plot_embeddings_2d(isomap_embeddings, labels, title='Isomap 2D Visualization')
+    # 2D Visualizations with Time Measurement
+    def measure_time(func, *args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        return result, end_time - start_time
     
-    # 3D Visualizations
+    # 2D Visualizations with Time Measurement
     # PCA 차원 축소 및 시각화
-    pca_embeddings_3d = reduce_dimensions_pca(normalized_embeddings, n_components=3)
-    plot_embeddings_3d(pca_embeddings_3d, labels, title='PCA 3D Visualization')
+    pca_embeddings, pca_time = measure_time(reduce_dimensions_pca, normalized_embeddings, n_components=2)
+    plot_embeddings_2d(pca_embeddings, labels, title='PCA 2D Visualization')
+    print(f"PCA 2D reduction time: {pca_time:.4f} seconds")
 
     # t-SNE 차원 축소 및 시각화
-    tsne_embeddings_3d = reduce_dimensions_tsne(normalized_embeddings, n_components=3)
-    plot_embeddings_3d(tsne_embeddings_3d, labels, title='t-SNE 3D Visualization')
+    tsne_embeddings, tsne_time = measure_time(reduce_dimensions_tsne, normalized_embeddings, n_components=2)
+    plot_embeddings_2d(tsne_embeddings, labels, title='t-SNE 2D Visualization')
+    print(f"t-SNE 2D reduction time: {tsne_time:.4f} seconds")
 
     # UMAP 차원 축소 및 시각화
-    umap_embeddings_3d = reduce_dimensions_umap(normalized_embeddings, n_components=3)
-    plot_embeddings_3d(umap_embeddings_3d, labels, title='UMAP 3D Visualization')
+    umap_embeddings, umap_time = measure_time(reduce_dimensions_umap, normalized_embeddings, n_components=2)
+    plot_embeddings_2d(umap_embeddings, labels, title='UMAP 2D Visualization')
+    print(f"UMAP 2D reduction time: {umap_time:.4f} seconds")
 
     # MDS 차원 축소 및 시각화
-    mds_embeddings_3d = reduce_dimensions_mds(normalized_embeddings, n_components=3)
-    plot_embeddings_3d(mds_embeddings_3d, labels, title='MDS 3D Visualization')
+    mds_embeddings, mds_time = measure_time(reduce_dimensions_mds, normalized_embeddings, n_components=2)
+    plot_embeddings_2d(mds_embeddings, labels, title='MDS 2D Visualization')
+    print(f"MDS 2D reduction time: {mds_time:.4f} seconds")
 
     # Isomap 차원 축소 및 시각화
-    isomap_embeddings_3d = reduce_dimensions_isomap(normalized_embeddings, n_components=3)
+    isomap_embeddings, isomap_time = measure_time(reduce_dimensions_isomap, normalized_embeddings, n_components=2)
+    plot_embeddings_2d(isomap_embeddings, labels, title='Isomap 2D Visualization')
+    print(f"Isomap 2D reduction time: {isomap_time:.4f} seconds")
+
+    # 3D Visualizations with Time Measurement
+    # PCA 차원 축소 및 시각화
+    pca_embeddings_3d, pca_time_3d = measure_time(reduce_dimensions_pca, normalized_embeddings, n_components=3)
+    plot_embeddings_3d(pca_embeddings_3d, labels, title='PCA 3D Visualization')
+    print(f"PCA 3D reduction time: {pca_time_3d:.4f} seconds")
+
+    # t-SNE 차원 축소 및 시각화
+    tsne_embeddings_3d, tsne_time_3d = measure_time(reduce_dimensions_tsne, normalized_embeddings, n_components=3)
+    plot_embeddings_3d(tsne_embeddings_3d, labels, title='t-SNE 3D Visualization')
+    print(f"t-SNE 3D reduction time: {tsne_time_3d:.4f} seconds")
+
+    # UMAP 차원 축소 및 시각화
+    umap_embeddings_3d, umap_time_3d = measure_time(reduce_dimensions_umap, normalized_embeddings, n_components=3)
+    plot_embeddings_3d(umap_embeddings_3d, labels, title='UMAP 3D Visualization')
+    print(f"UMAP 3D reduction time: {umap_time_3d:.4f} seconds")
+
+    # MDS 차원 축소 및 시각화
+    mds_embeddings_3d, mds_time_3d = measure_time(reduce_dimensions_mds, normalized_embeddings, n_components=3)
+    plot_embeddings_3d(mds_embeddings_3d, labels, title='MDS 3D Visualization')
+    print(f"MDS 3D reduction time: {mds_time_3d:.4f} seconds")
+
+    # Isomap 차원 축소 및 시각화
+    isomap_embeddings_3d, isomap_time_3d = measure_time(reduce_dimensions_isomap, normalized_embeddings, n_components=3)
     plot_embeddings_3d(isomap_embeddings_3d, labels, title='Isomap 3D Visualization')
+    print(f"Isomap 3D reduction time: {isomap_time_3d:.4f} seconds")
