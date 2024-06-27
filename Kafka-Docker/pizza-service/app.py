@@ -1,7 +1,7 @@
-import pizza_service
-import json
-from threading import Thread
 from flask import Flask
+from threading import Thread
+import json
+import pizza_service
 import sys
 sys.path.append('/app')
 
@@ -13,7 +13,7 @@ app = Flask(__name__)
 def order_pizzas(count):
     print('@@@@')
     order_id = pizza_service.order_pizzas(int(count))
-    return json.dumpqs({"order_id": order_id})
+    return json.dumps({"order_id": order_id})
 
 
 @app.route('/order/<order_id>', methods=['GET'])
