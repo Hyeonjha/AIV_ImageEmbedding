@@ -4,7 +4,7 @@ services:
     build: ./pizza-service
     container_name: pizza-service
     ports:
-    - 4000:4000
+      - 4000:4000
     environment:
       - KAFKA_BROKER=kafka:9092
     # depends_on:
@@ -57,7 +57,7 @@ services:
 
     networks:
       - our_net
-      
+
 networks:
   our_net:
     driver: bridge
