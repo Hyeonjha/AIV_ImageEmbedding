@@ -1,0 +1,56 @@
+version: "3.9"
+services:
+  zookeeper:
+    container_name: local-zookeeper
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+  kafka:
+    container_name: kafka
+    image: wurstmeister/kafka:latest
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_CREATE_TOPICS: "pizza:1:1,pizza-with-sauce:1:1,pizza-with-cheese:1:1,pizza-with-meats:1:1,pizza-with-veggies:1:1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    depends_on:
+      - zookeeper
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  pizza-service:
+    build: ./pizza-service
+    container_name: pizza-service
+    environment:
+      - KAFKA_BROKER=kafka:9092
+    depends_on:
+      - kafka
+  sauce-service:
+    build: ./sauce-service
+    container_name: sauce-service
+    environment:
+      - KAFKA_BROKER=kafka:9092
+    depends_on:
+      - kafka
+  cheese-service:
+    build: ./cheese-service
+    container_name: cheese-service
+    environment:
+      - KAFKA_BROKER=kafka:9092
+    depends_on:
+      - kafka
+  meat-service:
+    build: ./meat-service
+    container_name: meat-service
+    environment:
+      - KAFKA_BROKER=kafka:9092
+    depends_on:
+      - kafka
+  veggie-service:
+    build: ./veggie-service
+    container_name: veggie-service
+    environment:
+      - KAFKA_BROKER=kafka:9092
+    depends_on:
+      - kafka
