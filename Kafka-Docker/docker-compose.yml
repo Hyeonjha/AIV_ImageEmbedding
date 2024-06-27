@@ -1,0 +1,63 @@
+version: "3.9"
+services:
+  pizza-service:
+    build: ./pizza-service
+    container_name: pizza-service
+    ports:
+    - 4000:4000
+    environment:
+      - KAFKA_BROKER=kafka:9092
+    # depends_on:
+    #   - kafka
+    command: ["wait-for-it.sh", "kafka:9092", "--", "python", "app.py"]
+
+    networks:
+      - our_net
+  sauce-service:
+    build: ./sauce-service
+    container_name: sauce-service
+    environment:
+      - KAFKA_BROKER=kafka:9092
+    # depends_on:
+    #   - kafka
+    command: ["wait-for-it.sh", "kafka:9092", "--", "python", "main.py"]
+
+    networks:
+      - our_net
+  cheese-service:
+    build: ./cheese-service
+    container_name: cheese-service
+    environment:
+      - KAFKA_BROKER=kafka:9092
+    # depends_on:
+    #   - kafka
+    command: ["wait-for-it.sh", "kafka:9092", "--", "python", "main.py"]
+
+    networks:
+      - our_net
+  meat-service:
+    build: ./meat-service
+    container_name: meat-service
+    environment:
+      - KAFKA_BROKER=kafka:9092
+    # depends_on:
+    #   - kafka
+    command: ["wait-for-it.sh", "kafka:9092", "--", "python", "main.py"]
+
+    networks:
+      - our_net
+  veggie-service:
+    build: ./veggie-service
+    container_name: veggie-service
+    environment:
+      - KAFKA_BROKER=kafka:9092
+    # depends_on:
+    #   - kafka
+    command: ["wait-for-it.sh", "kafka:9092", "--", "python", "main.py"]
+
+    networks:
+      - our_net
+      
+networks:
+  our_net:
+    driver: bridge
