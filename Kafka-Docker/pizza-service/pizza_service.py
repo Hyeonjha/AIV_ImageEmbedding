@@ -39,8 +39,9 @@ def load_orders():
         if event is None:
             pass
         elif event.error():
-            print(f'Bummer - {event.error()}')
+            print(f'Bummer - {event.error()}',flush=True)
         else:
+            print('finish pizza ', event.value(), flush=True)
             pizza = json.loads(event.value())
             add_pizza(pizza['order_id'], pizza)
 

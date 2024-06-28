@@ -22,18 +22,21 @@ def start_service():
         elif msg.error():
             pass
         else:
+            print('start cheese ', msg.value(), flush=True)
             pizza = json.loads(msg.value())
             add_cheese(msg.key(), pizza)
 
 
 def add_cheese(order_id, pizza):
     pizza['cheese'] = calc_cheese()
-    cheese_producer.produce('pizza-with-cheese', key=order_id, value=json.dumps(pizza))
+    cheese_producer.produce('pizza-with-cheese',
+                            key=order_id, value=json.dumps(pizza))
 
 
 def calc_cheese():
     i = random.randint(0, 6)
-    cheeses = ['extra', 'none', 'three cheese', 'goat cheese', 'extra', 'three cheese', 'goat cheese']
+    cheeses = ['extra', 'none', 'three cheese',
+               'goat cheese', 'extra', 'three cheese', 'goat cheese']
     return cheeses[i]
 
 

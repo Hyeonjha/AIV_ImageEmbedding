@@ -22,18 +22,21 @@ def start_service():
         elif msg.error():
             pass
         else:
+            print('start meat ', msg.value(), flush=True)
             pizza = json.loads(msg.value())
             add_meats(msg.key(), pizza)
 
 
 def add_meats(order_id, pizza):
     pizza['meats'] = calc_meats()
-    meats_producer.produce('pizza-with-meats', key=order_id, value=json.dumps(pizza))
+    meats_producer.produce(
+        'pizza-with-meats', key=order_id, value=json.dumps(pizza))
 
 
 def calc_meats():
     i = random.randint(0, 4)
-    meats = ['pepperoni', 'sausage', 'ham', 'anchovies', 'salami', 'bacon', 'pepperoni', 'sausage', 'ham', 'anchovies', 'salami', 'bacon']
+    meats = ['pepperoni', 'sausage', 'ham', 'anchovies', 'salami', 'bacon',
+             'pepperoni', 'sausage', 'ham', 'anchovies', 'salami', 'bacon']
     selection = []
     if i == 0:
         return 'none'
