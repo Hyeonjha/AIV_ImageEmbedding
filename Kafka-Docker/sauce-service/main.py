@@ -20,10 +20,10 @@ def start_service():
         if msg is None:
             pass
         elif msg.error():
-            print('error sauce', msg.error(), flush=True)
+            print('error sauce', msg.error(), flush=True)  
             pass
         else:
-            print('start sauce ', msg.value(), flush=True)
+            print('start sauce ', msg.value(), flush=True) 
             pizza = json.loads(msg.value())
             add_sauce(msg.key(), pizza)
 
@@ -32,7 +32,7 @@ def add_sauce(order_id, pizza):
     pizza['sauce'] = calc_sauce()
     sauce_producer.produce(
         'pizza-with-sauce', key=order_id, value=json.dumps(pizza))
-
+    sauce_producer.flush()  ######
 
 def calc_sauce():
     i = random.randint(0, 8)

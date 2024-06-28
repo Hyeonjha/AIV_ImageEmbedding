@@ -1,3 +1,4 @@
+
 from configparser import ConfigParser
 from confluent_kafka import Producer, Consumer
 import json
@@ -22,16 +23,15 @@ def start_service():
         elif msg.error():
             pass
         else:
-            print('start meat ', msg.value(), flush=True)
+            print('start meat ', msg.value(), flush=True)  
             pizza = json.loads(msg.value())
             add_meats(msg.key(), pizza)
 
 
 def add_meats(order_id, pizza):
     pizza['meats'] = calc_meats()
-    meats_producer.produce(
-        'pizza-with-meats', key=order_id, value=json.dumps(pizza))
-
+    meats_producer.produce('pizza-with-meats', key=order_id, value=json.dumps(pizza))
+    meats_producer.flush()
 
 def calc_meats():
     i = random.randint(0, 4)

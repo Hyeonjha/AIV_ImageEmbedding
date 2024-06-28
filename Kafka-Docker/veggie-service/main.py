@@ -22,16 +22,15 @@ def start_service():
         elif msg.error():
             pass
         else:
-            print('start veggies ', msg.value(), flush=True)
+            print('start veggies ', msg.value(), flush=True)   
             pizza = json.loads(msg.value())
             add_veggies(msg.key(), pizza)
 
 
 def add_veggies(order_id, pizza):
     pizza['veggies'] = calc_veggies()
-    veggies_producer.produce('pizza-with-veggies',
-                             key=order_id, value=json.dumps(pizza))
-
+    veggies_producer.produce('pizza-with-veggies', key=order_id, value=json.dumps(pizza))
+    veggies_producer.flush()
 
 def calc_veggies():
     i = random.randint(0, 4)

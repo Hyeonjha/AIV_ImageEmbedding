@@ -21,6 +21,7 @@ def order_pizzas(count):
         new_pizza = Pizza()
         new_pizza.order_id = order.id
         pizza_producer.produce('pizza', key=order.id, value=new_pizza.toJSON())
+        
     pizza_producer.flush()
     return order.id
 
@@ -34,14 +35,15 @@ def get_order(order_id):
 def load_orders():
     pizza_consumer = Consumer(consumer_config)
     pizza_consumer.subscribe(['pizza-with-veggies'])
+
     while True:
         event = pizza_consumer.poll(1.0)
         if event is None:
             pass
         elif event.error():
-            print(f'Bummer - {event.error()}',flush=True)
+            print(f'Bummer - {event.error()}', flush=True) 
         else:
-            print('finish pizza ', event.value(), flush=True)
+            print('finish pizza ', event.value(), flush=True) 
             pizza = json.loads(event.value())
             add_pizza(pizza['order_id'], pizza)
 
