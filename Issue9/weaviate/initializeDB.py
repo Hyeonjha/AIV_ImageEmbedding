@@ -14,5 +14,28 @@ def initialize_database(client):
     except weaviate.exceptions.UnexpectedStatusCodeException as e:
         print(f"Error initializing database: {e}")
 
+    # 스키마 정의
+    class_obj = {
+        "class": "ImageEmbedding",
+        "vectorizer": "none",
+        "properties": [
+            {
+                "name": "image_id",
+                "dataType": ["string"]
+            },
+            {
+                "name": "embedding",
+                "dataType": ["number[]"]
+            }
+        ]
+    }
+
+    # 클래스 생성
+    try:
+        client.schema.create_class(class_obj)
+        print("Schema created.")
+    except weaviate.exceptions.UnexpectedStatusCodeException as e:
+        print(f"Error creating schema: {e}")
+
 if __name__ == "__main__":
     initialize_database(client)
