@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+asyncpg
+psycopg2-binary
+kafka-python
+weaviate-client
+torch
+torchvision
+pillow
