@@ -67,10 +67,10 @@ async def upload_image(file: UploadFile = File(...)):
 
     image_id = str(uuid.uuid4())  # 이미지 ID 생성 (UUID)
     db = SessionLocal()  # 데이터베이스 연결
-    metadata = {"original_filename": file.filename}  # 메타데이터 설정
+    image_metadata = {"original_filename": file.filename}  # 메타데이터 설정
     
     # 이미지 정보 데이터베이스에 저장
-    db_image = Image(id=image_id, name=file.filename, size=size, path=filepath, hash=hash, metadata=metadata)
+    db_image = Image(id=image_id, name=file.filename, size=size, path=filepath, hash=hash, image_metadata=image_metadata)
     db.add(db_image)
     db.commit()
     db.refresh(db_image)

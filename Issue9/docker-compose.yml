@@ -102,6 +102,7 @@ services:
       - app_net
     restart: always
 
+
   # weaviate : 이미지 임베딩을 저장하고 관리
   weaviate:
     image: semitechnologies/weaviate:latest

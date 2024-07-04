@@ -11,7 +11,11 @@
 |   |-- Dockerfile
 |   |-- main.py
 |   |-- requirements.txt
-|-- embedding-service/
+|-- embedding-worker-1/
+|   |-- Dockerfile
+|   |-- embedding_service.py
+|   |-- requirements.txt
+|-- embedding-worker-2/
 |   |-- Dockerfile
 |   |-- embedding_service.py
 |   |-- requirements.txt
@@ -34,8 +38,8 @@ FastAPI를 사용하여 이미지를 업로드하고, 이미지 메타데이터�
 Kafka에서 메시지를 소비하고, 이미지를 임베딩하여 Weaviate에 저장합니다.
 
 #### 주요 코드
-- **embedding-service/Dockerfile**: 임베딩 서비스 애플리케이션을 위한 Docker 이미지를 빌드합니다.
-- **embedding-service/embedding_service.py**: Kafka에서 이미지를 소비하고, 임베딩을 생성하여 Weaviate에 저장합니다.
+- **embedding-worker-1/Dockerfile**: 임베딩 서비스 애플리케이션을 위한 Docker 이미지를 빌드합니다.
+- **embedding-worker-1/embedding_service.py**: Kafka에서 이미지를 소비하고, 임베딩을 생성하여 Weaviate에 저장합니다.
 
 ## 실행 방법
 프로젝트 루트 디렉토리에서 다음 명령어를 실행하여 Docker Compose로 모든 서비스를 시작합니다:
