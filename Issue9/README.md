@@ -4,7 +4,7 @@
 
 ## 프로젝트 구조
 ```lua
-/Kafka_Final
+/Issue9
 |-- docker-compose.yml
 |-- requirements.txt
 |-- image-service/

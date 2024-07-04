@@ -1,7 +1,8 @@
 import os
 import hashlib
 import uuid
-from fastapi import FastAPI, File, UploadFile
+import io
+from fastapi import FastAPI, File, UploadFile, Query
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, Column, String, Integer, JSON
@@ -9,9 +10,15 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from kafka import KafkaProducer
 from pydantic import BaseModel
+import weaviate
+from typing import List
+from PIL import Image as PILImage
+import torch
+from torchvision import models, transforms
 
 # 데이터베이스 URL 환경 변수
 DATABASE_URL = os.getenv('DATABASE_URI')
+WEAVIATE_URL = os.getenv('WEAVIATE_URL')
 
 # SQLAlchemy 설정
 engine = create_engine(DATABASE_URL)
@@ -41,6 +48,10 @@ producer = KafkaProducer(bootstrap_servers=os.getenv('KAFKA_BROKER'))
 class UploadResponse(BaseModel):
     message: str
     image_id: str
+
+class SimilarImageResponse(BaseModel):
+    image_id: str
+    score: float
 
 # CORS 설정
 app.add_middleware(
@@ -81,3 +92,46 @@ async def upload_image(file: UploadFile = File(...)):
 
     # 응답 변환
     return JSONResponse(content={"message": "Image uploaded successfully", "image_id": image_id})
+
+# 모델 설정
+model = models.convnext_base(pretrained=True)
+model.eval()
+preprocess = transforms.Compose([
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+])
+
+# 유사 이미지 검색 엔드포인트
+@app.post("/search_similar/", response_model=List[SimilarImageResponse])
+async def search_similar(file: UploadFile = File(...)):
+    try:
+        contents = await file.read()
+        image = PILImage.open(io.BytesIO(contents))
+
+        input_tensor = preprocess(image)
+        input_batch = input_tensor.unsqueeze(0)
+
+        with torch.no_grad():
+            embedding = model(input_batch).numpy().flatten().tolist()
+
+        if not WEAVIATE_URL:
+            raise ValueError("WEAVIATE_URL environment variable is not set")
+
+        client = weaviate.Client(WEAVIATE_URL)
+
+        query_result = client.query.get("ImageEmbedding", ["uuid", "_additional { score }"]) \
+            .with_near_vector({"vector": embedding}) \
+            .with_limit(10) \
+            .do()
+
+        results = []
+        for result in query_result["data"]["Get"]["ImageEmbedding"]:
+            results.append(SimilarImageResponse(image_id=result["uuid"], score=result["_additional"]["score"]))
+
+        return results
+
+    except Exception as e:
+        print(f"Error during searching similar images: {e}")
+        return JSONResponse(status_code=500, content={"message": "Internal Server Error"})

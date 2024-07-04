@@ -54,30 +54,50 @@ preprocess = transforms.Compose([
 
 # 메시지 소비 및 임베딩 생성
 for message in consumer:
-    image_id = message.value.decode('utf-8')  # Kafka 메시지에서 이미지 ID 추출
-    db = SessionLocal()  # 데이터베이스 연결
+    # Kafka 메시지에서 이미지 ID 추출
+    image_id = message.value
+
+    print(f"Received message: {image_id}")  # 디버그 메시지 추가
+
+    # 데이터베이스 연결
+    db = SessionLocal()
 
     # 이미지 정보 조회
     db_image = db.query(Image).filter(Image.id == image_id).first()
     db.close()
 
     if db_image:
-        img_path = db_image.path  # 이미지 파일 경로
-        image = PILImage.open(img_path)  # 이미지 열기
+        # 이미지 파일 경로
+        img_path = db_image.path
 
-        # 이미지 전처리
-        input_tensor = preprocess(image)
-        input_batch = input_tensor.unsqueeze(0)
+        print(f"Processing image: {img_path}")  # 디버그 메시지 추가
 
-        # 모델을 사용하여 임베딩 생성
-        with torch.no_grad():
-            embedding = model(input_batch).numpy().flatten().tolist()
+        try:
+            # 이미지 열기
+            image = PILImage.open(img_path)
 
-        # Weaviate에 임베딩 저장
-        client.data_object.create(
-            data_object={
-                "uuid": image_id,
-                "embedding": embedding,
-            },
-            class_name="ImageEmbedding"
-        )
+            # 이미지 전처리
+            input_tensor = preprocess(image)
+            input_batch = input_tensor.unsqueeze(0)
+
+            # 모델을 사용하여 임베딩 생성
+            with torch.no_grad():
+                embedding = model(input_batch).numpy().flatten().tolist()
+
+            print(f"Generated embedding for image: {image_id}")  # 디버그 메시지 추가
+
+            # Weaviate에 임베딩 저장
+            client.data_object.create(
+                data_object={
+                    "uuid": image_id,
+                    "embedding": embedding,
+                },
+                class_name="ImageEmbedding"
+            )
+
+            print(f"Stored embedding in Weaviate for image: {image_id}")  # 디버그 메시지 추가
+
+        except Exception as e:
+            print(f"Error processing image {img_path}: {e}")  # 오류 메시지 추가
+    else:
+        print(f"Image ID {image_id} not found in database")
