@@ -16,6 +16,7 @@ from PIL import Image as PILImage
 import torch
 from torchvision import models, transforms
 from dotenv import load_dotenv
+from fastapi.responses import FileResponse
 
 # 환경 변수 로드
 load_dotenv()
@@ -246,3 +247,13 @@ async def search_similar(file: UploadFile = File(...), threshold: float = 0.8, t
     except Exception as e:
         print(f"Error during searching similar images: {e}")
         return JSONResponse(status_code=500, content={"message": "Internal Server Error"})
+    
+# 이미지 파일 제공 엔드포인트
+@app.get("/images/{image_id}")
+async def get_image(image_id: str):
+    db = SessionLocal()
+    db_image = db.query(Image).filter(Image.id == image_id).first()
+    db.close()
+    if db_image:
+        return FileResponse(db_image.path)
+    return JSONResponse(status_code=404, content={"message": "Image not found"})

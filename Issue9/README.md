@@ -19,6 +19,10 @@
 |   |-- Dockerfile
 |   |-- embedding_service.py
 |   |-- requirements.txt
+|-- locust/
+|   |-- Dockerfile
+|   |-- locustfile.py
+|-- upload_test.py
 |-- README.md
 ```
 
@@ -40,6 +44,20 @@ Kafka에서 메시지를 소비하고, 이미지를 임베딩하여 Weaviate에 
 #### 주요 코드
 - **embedding-worker-1/Dockerfile**: 임베딩 서비스 애플리케이션을 위한 Docker 이미지를 빌드합니다.
 - **embedding-worker-1/embedding_service.py**: Kafka에서 이미지를 소비하고, 임베딩을 생성하여 Weaviate에 저장합니다.
+- **embedding-worker-2/Dockerfile**: 임베딩 서비스 애플리케이션을 위한 Docker 이미지를 빌드합니다.
+- **embedding-worker-2/embedding_service.py**: Kafka에서 이미지를 소비하고, 임베딩을 생성하여 Weaviate에 저장합니다.
+
+### 4. Locust를 이용한 부하 테스트 (locust)
+Locust를 사용하여 이미지 업로드 및 유사 이미지 검색 API의 부하 테스트를 수행합니다.
+
+#### 주요 코드
+- **locust/Dockerfile**: Locust 애플리케이션을 위한 Docker 이미지를 빌드합니다.
+- **locust/locustfile.py**: Locust 스크립트로, 이미지 업로드 및 유사 이미지 검색 작업을 정의합니다.
+
+### 5. 테스트 스크립트 (upload_test.py)
+test 이미지 dataset 업로드를 위한 스크립트입니다.
+
+
 
 ## 실행 방법
 프로젝트 루트 디렉토리에서 다음 명령어를 실행하여 Docker Compose로 모든 서비스를 시작합니다:
@@ -55,3 +73,15 @@ docker-compose up --build
 
 ### 3. Weaviate에서 임베딩 데이터 확인
 브라우저에서 `http://localhost:8080/v1/objects`로 접속하여 저장된 이미지 임베딩 데이터를 확인합니다.
+
+### 4. Locust를 이용한 부하 테스트 실행
+다음 명령어를 실행하여 Locust 부하 테스트를 시작합니다:
+```sh
+docker-compose -f docker-compose.yml -f locust/docker-compose.yml up --build
+```
+
+### (필요 시) 테스트 스크립트 실행
+다음 명령어를 실행하여 `upload_test.py` 스크립트를 실행합니다:
+```sh
+python3 /path/to/upload_test.py
+```
