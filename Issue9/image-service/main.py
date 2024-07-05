@@ -2,7 +2,7 @@ import os
 import hashlib
 import uuid
 import io
-from fastapi import FastAPI, File, UploadFile, Query
+from fastapi import FastAPI, File, UploadFile, Query, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, Column, String, Integer, JSON
@@ -15,6 +15,10 @@ from typing import List
 from PIL import Image as PILImage
 import torch
 from torchvision import models, transforms
+from dotenv import load_dotenv
+
+# 환경 변수 로드
+load_dotenv()
 
 # 데이터베이스 URL 환경 변수
 DATABASE_URL = os.getenv('DATABASE_URI')
@@ -62,6 +66,58 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Weaviate 스키마 설정
+def create_weaviate_schema():
+    client = weaviate.Client(WEAVIATE_URL)
+
+    # 현재 스키마 확인
+    current_schema = client.schema.get()
+    print("Current schema:", current_schema)
+
+    schema = {
+        "classes": [
+            {
+                "class": "ImageEmbedding",
+                "description": "A class to store image embeddings",
+                "vectorizer": "none",
+           #     "vectorIndexType": "hnsw",  # HNSW 인덱스 사용
+                "properties": [
+                    {
+                        "name": "uuid",
+                        "dataType": ["string"],
+                        "description": "The UUID of the image"
+                    },
+                    {
+                        "name": "embedding",
+                        "dataType": ["number[]"],
+                        "description": "The embedding vector of the image"
+                    }
+                ]
+            }
+        ]
+    }
+    """
+    client.schema.delete_class("ImageEmbedding")  # 기존 클래스 삭제 (있을 경우)
+    client.schema.create(schema)
+    print("Weaviate schema created")
+"""
+    # 기존 클래스가 있다면 삭제
+    if "ImageEmbedding" in [c['class'] for c in current_schema['classes']]:
+        client.schema.delete_class("ImageEmbedding")
+    
+    # 새 스키마 생성
+    client.schema.create(schema)
+    print("Weaviate schema created")
+
+    # 생성된 스키마 확인
+    new_schema = client.schema.get()
+    print("New schema:", new_schema)
+
+# FastAPI lifespan 이벤트 핸들러로 스키마 생성
+@app.on_event("startup")
+async def startup_event():
+    create_weaviate_schema()
+
 # 이미지 업로드 엔드포인트
 @app.post("/upload/", response_model=UploadResponse)
 async def upload_image(file: UploadFile = File(...)):
@@ -103,9 +159,12 @@ preprocess = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
 
+def weaviate_certainty_to_cosine(certainty):
+    return 2 * certainty - 1
+
 # 유사 이미지 검색 엔드포인트
 @app.post("/search_similar/", response_model=List[SimilarImageResponse])
-async def search_similar(file: UploadFile = File(...)):
+async def search_similar(file: UploadFile = File(...), threshold: float = 0.8, top_n: int = 5):
     try:
         contents = await file.read()
         image = PILImage.open(io.BytesIO(contents))
@@ -116,19 +175,71 @@ async def search_similar(file: UploadFile = File(...)):
         with torch.no_grad():
             embedding = model(input_batch).numpy().flatten().tolist()
 
+        #print("Embedding:", embedding)  # 디버그를 위한 임베딩 출력
+
+        print(f"Search embedding: {embedding[:10]}...")  # 처음 10개 요소만 출력
+
         if not WEAVIATE_URL:
             raise ValueError("WEAVIATE_URL environment variable is not set")
 
         client = weaviate.Client(WEAVIATE_URL)
+        
+        
+        we_result = client.query.get("ImageEmbedding", ["uuid"]).do()
+        print(f"we_result : {we_result}")
 
-        query_result = client.query.get("ImageEmbedding", ["uuid", "_additional { score }"]) \
+        we_result2 = client.query.get("ImageEmbedding", ["uuid", "_additional { distance }"]) \
             .with_near_vector({"vector": embedding}) \
-            .with_limit(10) \
+            .with_limit(top_n) \
             .do()
+        print(f"we_result2 : {we_result2}")
 
+        query_result = client.query.get("ImageEmbedding", ["uuid", "_additional { certainty }"]) \
+            .with_near_vector({"vector": embedding}) \
+            .with_limit(top_n) \
+            .do()
+        
+        """
+
+        # 간단한 쿼리로 테스트
+        test_query = client.query.get("ImageEmbedding", ["uuid"]).do()
+        print("Test query result:", test_query)
+
+        # 벡터 검색 쿼리
+        query_result = client.query.get("ImageEmbedding", ["uuid"]) \
+            .with_near_vector({"vector": embedding}) \
+            .with_limit(top_n) \
+            .with_additional(["distance"]) \
+            .do()
+        """
+
+
+        print("Query result:", query_result)  # 디버그를 위한 로그 추가
+
+        if 'errors' in query_result:
+            raise HTTPException(status_code=500, detail=query_result['errors'])
+
+       
         results = []
-        for result in query_result["data"]["Get"]["ImageEmbedding"]:
-            results.append(SimilarImageResponse(image_id=result["uuid"], score=result["_additional"]["score"]))
+        for item in query_result['data']['Get']['ImageEmbedding']:
+            print("start searching similarity")
+
+            certainty = item['_additional']['certainty']
+            cosine_similarity = weaviate_certainty_to_cosine(certainty)
+
+            print(f"sim : {cosine_similarity}")
+
+            if cosine_similarity >= threshold:
+                results.append(SimilarImageResponse(image_id=item['uuid'], score=cosine_similarity))
+        """
+        results = []
+        for item in query_result['data']['Get']['ImageEmbedding']:
+            distance = item['_additional']['distance']
+            similarity = 1 - distance  # 거리를 유사도로 변환
+            if similarity >= threshold:
+                results.append(SimilarImageResponse(image_id=item['uuid'], score=similarity))
+        """
+        print("Results:", results)  # 디버그를 위한 로그 추가
 
         return results
 

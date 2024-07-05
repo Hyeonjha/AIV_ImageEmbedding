@@ -10,6 +10,7 @@ from PIL import Image as PILImage
 
 # 데이터베이스 URL 환경 변수
 DATABASE_URL = os.getenv('DATABASE_URI')
+WEAVIATE_URL = os.getenv('WEAVIATE_URL')  ##
 
 # SQLAlchemy 설정
 engine = create_engine(DATABASE_URL)
@@ -40,7 +41,10 @@ consumer = KafkaConsumer(
 )
 
 # Weaviate 클라이언트 설정
-client = weaviate.Client(os.getenv('WEAVIATE_URL'))
+#client = weaviate.Client(os.getenv('WEAVIATE_URL'))
+
+# Weaviate 클라이언트 설정
+client = weaviate.Client(WEAVIATE_URL)
 
 # ConvNeXT 모델 설정
 model = models.convnext_base(pretrained=True)
@@ -92,7 +96,8 @@ for message in consumer:
                     "uuid": image_id,
                     "embedding": embedding,
                 },
-                class_name="ImageEmbedding"
+                class_name="ImageEmbedding",
+                vector=embedding
             )
 
             print(f"Stored embedding in Weaviate for image: {image_id}")  # 디버그 메시지 추가
