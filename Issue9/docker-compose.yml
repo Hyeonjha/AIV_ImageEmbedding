@@ -74,6 +74,7 @@ services:
   embedding-worker-1:
     build:
       context: ./embedding-worker-1
+    image: embedding-worker:latest
     environment:
       DATABASE_URI: postgresql://user:password@db:5432/imagedb
       KAFKA_BROKER: kafka:9092
@@ -88,8 +89,7 @@ services:
     restart: always
 
   embedding-worker-2:
-    build:
-      context: ./embedding-worker-2
+    image: embedding-worker:latest
     environment:
       DATABASE_URI: postgresql://user:password@db:5432/imagedb
       KAFKA_BROKER: kafka:9092

@@ -119,6 +119,11 @@ def create_weaviate_schema():
 async def startup_event():
     create_weaviate_schema()
 
+# 루트 엔드포인트 추가
+@app.get("/")
+async def root():
+    return {"message": "Welcome to the Image Service API"}
+
 # 이미지 업로드 엔드포인트
 @app.post("/upload/", response_model=UploadResponse)
 async def upload_image(file: UploadFile = File(...)):
