@@ -15,10 +15,6 @@
 |   |-- Dockerfile
 |   |-- embedding_service.py
 |   |-- requirements.txt
-|-- embedding-worker-2/
-|   |-- Dockerfile
-|   |-- embedding_service.py
-|   |-- requirements.txt
 |-- locust/
 |   |-- Dockerfile
 |   |-- locustfile.py
@@ -84,4 +80,42 @@ docker-compose -f docker-compose.yml -f locust/docker-compose.yml up --build
 다음 명령어를 실행하여 `upload_test.py` 스크립트를 실행합니다:
 ```sh
 python3 /path/to/upload_test.py
+```
+
+
+## 결과 정리
+
+### 1. upload test
+```
+Issue9/report_1720414191.2980642.html
+```
+
+### 2. similar search test (15390개 저장된 상태에서 검색)
+```
+Issue9/report_1720415120.7182093.html
+```
+
+### 3. similar search test (324개 저장된 상태에서 검색)
+```
+Issue9/report_1720416762.3693528.html
+```
+
+### 4.  여러 client가 동시에 수십 수백장을 업로드 요청 테스트
+```
+Issue9/report_1720419701.0492265.html
+```
+
+### 5. 이미지 사이즈 1000 * 1000
+```
+Issue9/report_1720423062.9218946.html
+```
+
+### 5-1. 이미지 사이즈 1000 * 1000 + 한번에 수십, 수백장 업로드
+```
+Issue9/report_1720423847.8205981.html
+```
+
+### 6. 이미지 사이즈 3000 * 3000 + 한번에 수십, 수백장 업로드
+```
+Issue9/report_1720424721.9816885.html
 ```
