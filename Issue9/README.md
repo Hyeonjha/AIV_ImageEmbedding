@@ -71,10 +71,7 @@ docker-compose up --build
 브라우저에서 `http://localhost:8080/v1/objects`로 접속하여 저장된 이미지 임베딩 데이터를 확인합니다.
 
 ### 4. Locust를 이용한 부하 테스트 실행
-다음 명령어를 실행하여 Locust 부하 테스트를 시작합니다:
-```sh
-docker-compose -f docker-compose.yml -f locust/docker-compose.yml up --build
-```
+브라우저에서 `http://localhost:8089`로 접속하여 Locust 부하 테스트를 시작합니다.
 
 ### (필요 시) 테스트 스크립트 실행
 다음 명령어를 실행하여 `upload_test.py` 스크립트를 실행합니다:
@@ -83,39 +80,36 @@ python3 /path/to/upload_test.py
 ```
 
 
-## 결과 정리
+## locust 결과 정리
 
 ### 1. upload test
 ```
-Issue9/report_1720414191.2980642.html
+Issue9/locustResult/uploadImg.html
 ```
 
-### 2. similar search test (15390개 저장된 상태에서 검색)
+### 2. similar search test (303개 저장된 상태에서 검색) 
 ```
-Issue9/report_1720415120.7182093.html
-```
-
-### 3. similar search test (324개 저장된 상태에서 검색)
-```
-Issue9/report_1720416762.3693528.html
+Issue9/locustResult/searchSim.html
 ```
 
-### 4.  여러 client가 동시에 수십 수백장을 업로드 요청 테스트
+### 3.  여러 client가 동시에 수십 수백장을 업로드 요청 테스트
 ```
-Issue9/report_1720419701.0492265.html
-```
-
-### 5. 이미지 사이즈 1000 * 1000
-```
-Issue9/report_1720423062.9218946.html
+Issue9/locustResult/multiUpload.html
 ```
 
-### 5-1. 이미지 사이즈 1000 * 1000 + 한번에 수십, 수백장 업로드
+### 4. 이미지 사이즈 1000 * 1000
 ```
-Issue9/report_1720423847.8205981.html
+Issue9/locustResult/imgSize10.html
 ```
 
-### 6. 이미지 사이즈 3000 * 3000 + 한번에 수십, 수백장 업로드
+### 4-1. 이미지 사이즈 1000 * 1000 + 한번에 수십, 수백장 업로드
 ```
-Issue9/report_1720424721.9816885.html
+Issue9/locustResult/imgSize10_multi.html
 ```
+
+### 5. 이미지 사이즈 3000 * 3000 + 한번에 수십, 수백장 업로드
+```
+Issue9/locustResult/imgSize30_multi.html
+```
+
+![alt text](test.jpeg)

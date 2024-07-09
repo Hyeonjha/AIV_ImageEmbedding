@@ -12,24 +12,30 @@ def generate_random_image(width, height):
     return byte_arr
 
 class ImageTasks(TaskSet):
-#    @task(10)
-#    def upload_image(self):
-#        """
-#        image = generate_random_image()
-#        files = {'file': ('test.jpg', image, 'image/jpeg')}
-#        self.client.post("/upload/", files=files)
-#        """
-#        pass  # 비활성화
-        
+    # @task
+    # def upload_image(self):
+    #     image = generate_random_image(100, 100)
+    #     files = {'file': ('test.jpg', image, 'image/jpeg')}
+    #     self.client.post("/upload/", files=files)
+    #     self.wait()
+    
     @task
-    def upload_large_image(self):
-        num_images = random.randint(10, 1000)
-        for _ in range(num_images):
-            # 이미지 크기를 설정합니다.
-            image = generate_random_image(3000, 3000)   # 100, 1000, 3000
-            files = {'file': ('test.jpg', image, 'image/jpeg')}
-            self.client.post("/upload/", files=files)
-            self.wait()
+    def search_similar(self):
+        image = generate_random_image(100, 100)
+        files = {'file': ('test.jpg', image, 'image/jpeg')}
+        self.client.post("/search_similar/", files=files) 
+        self.wait()
+
+        
+#    @task
+#    def upload_large_image(self):
+#        num_images = random.randint(10, 1000)
+#        for _ in range(num_images):
+#            # 이미지 크기를 설정합니다.
+#            image = generate_random_image(3000, 3000)   # 100, 1000, 3000
+#            files = {'file': ('test.jpg', image, 'image/jpeg')}
+#            self.client.post("/upload/", files=files)
+#            self.wait()
 
 #    @task
 #    def upload_multiple_images(self):
@@ -40,18 +46,6 @@ class ImageTasks(TaskSet):
 #            self.client.post("/upload/", files=files)
 #            self.wait()
 
-
-#    @task(1)
-#    def search_similar(self):
-#        """
-#        image = generate_random_image()
-#        files = {'file': ('test.jpg', image, 'image/jpeg')}
-#        self.client.post("/search_similar/", files=files)   
-#        """
-#        pass  # 비활성화
-
-    def wait(self):
-        self.user.wait()
         
 
 class WebsiteUser(HttpUser):
