@@ -5,10 +5,12 @@ import sharp from 'sharp'
 import path from 'path';
 import { queryLabelSet, queryLabelSetIdsInVersion } from './graphql.js';
 
-const endpoint = 'http://192.168.10.63:30832/graphql';
-const aivopsVersionId = 18154
-const imageUnitSize = 100
+// Parameters
+const endpoint = 'http://192.168.10.63:30832/graphql'; // metis-data on stg-ops.aiv.ai 
+const aivopsVersionId = 18220 // http://stg-ops.aiv.ai/project/1202/imagesTab
+const imagePaddingOptions = { use: false, imageUnitSize: 100 }
 
+///
 function getBbox(points, maxW, maxH) {
   let minX = 9999999, minY = 9999999
   let maxX = -9999999, maxY = -9999999
@@ -23,13 +25,16 @@ function getBbox(points, maxW, maxH) {
     if (point.y > maxY)
       maxY = point.y
   }
-  w = maxX - minX
-  h = maxY - minY
+  w = Math.floor(maxX - minX)
+  h = Math.floor(maxY - minY)
 
   let centerX = (maxX + minX) / 2
   let centerY = (maxY + minY) / 2
-  w = Math.ceil(w / imageUnitSize) * imageUnitSize
-  h = Math.ceil(h / imageUnitSize) * imageUnitSize
+
+  if (imagePaddingOptions.use) {
+    w = Math.ceil(w / imagePaddingOptions.imageUnitSize) * imagePaddingOptions.imageUnitSize
+    h = Math.ceil(h / imagePaddingOptions.imageUnitSize) * imagePaddingOptions.imageUnitSize
+  }
 
   let x = Math.round(centerX - w / 2)
   let y = Math.round(centerY - h / 2)
@@ -46,6 +51,7 @@ function getBbox(points, maxW, maxH) {
 
   return { x, y, w: w, h: h }
 }
+
 async function fetchImage(image, labelItems) {
   const url = `http://192.168.10.40:12010/api/v1/image?path=${image.path}`;
 
@@ -64,7 +70,7 @@ async function fetchImage(image, labelItems) {
       const outputDir = path.join(process.cwd(), 'downloaded', labelItem.LabelClass.name)
       mkdirSync(outputDir, { recursive: true })
 
-      const region = getBbox(labelItem.points, image.width, image.height, 2)
+      const region = getBbox(labelItem.points, image.width, image.height)
 
       const outputFilePath = path.join(outputDir, `${labelItem.id}.jpg`);
 
