@@ -112,4 +112,134 @@ Issue9/locustResult/imgSize10_multi.html
 Issue9/locustResult/imgSize30_multi.html
 ```
 
-![alt text](test.jpeg)
+
+
+
+
+## 7/10 결과 재정리
+### 1. 가지고 있던 test data 업로드, 검색
+```
+Issue9/locustResult/searchSim_.html
+```
+
+```
+embed_image took 0.45265913009643555 seconds
+search_similar_in_weaviate took 0.0861973762512207 seconds
+
+embed_image took 0.6620943546295166 seconds
+search_similar_in_weaviate took 0.0813436508178711 seconds
+```
+
+### 2. 사이즈 100*100 업로드(약 500개 업로드), 검색
+```
+Issue9/locustResult/upConv100.html
+Issue9/locustResult/searchSim_Conv100.html
+```
+
+```
+read_image took 2.6226043701171875e-06 seconds
+save_image took 0.00022029876708984375 seconds
+save_to_db took 0.011336088180541992 seconds
+send_to_kafka took 0.001672983169555664 seconds
+
+read_image took 3.814697265625e-06 seconds
+save_image took 0.0002071857452392578 seconds
+save_to_db took 0.010311365127563477 seconds
+send_to_kafka took 0.0002906322479248047 seconds
+
+read_image took 4.291534423828125e-06 seconds
+save_image took 0.001852273941040039 seconds
+save_to_db took 0.021559953689575195 seconds
+send_to_kafka took 0.0002925395965576172 seconds
+
+read_image took 2.86102294921875e-06 seconds
+save_image took 0.001077413558959961 seconds
+save_to_db took 0.010017633438110352 seconds
+send_to_kafka took 0.0006411075592041016 seconds
+```
+```
+preprocess_resize took 0.0010445117950439453 seconds
+preprocess_center_crop took 0.0001304149627685547 seconds
+preprocess_to_tensor took 0.0011560916900634766 seconds
+preprocess_normalize took 0.00042176246643066406 seconds
+embed_image took 0.6649417877197266 seconds
+search_similar_in_weaviate took 0.1017451286315918 seconds
+
+preprocess_resize took 0.0012297630310058594 seconds
+preprocess_center_crop took 0.00019049644470214844 seconds
+preprocess_to_tensor took 0.002794504165649414 seconds
+preprocess_normalize took 0.0034360885620117188 seconds
+embed_image took 0.4213104248046875 seconds
+search_similar_in_weaviate took 0.06925463676452637 seconds
+```
+
+### 3. 사이즈 1000*1000 업로드(약 500개 업로드), 검색
+```
+Issue9/locustResult/upConv1000.html
+Issue9/locustResult/searchSim_Conv1000.html
+```
+
+```
+read_image took 2.1457672119140625e-06 seconds
+save_image took 0.0002739429473876953 seconds
+save_to_db took 0.007207393646240234 seconds
+send_to_kafka took 0.0003101825714111328 seconds
+
+read_image took 4.0531158447265625e-06 seconds
+save_image took 0.00034165382385253906 seconds
+save_to_db took 0.015622615814208984 seconds
+send_to_kafka took 0.0016965866088867188 seconds
+```
+
+```
+preprocess_resize took 0.010740280151367188 seconds
+preprocess_center_crop took 0.0002155303955078125 seconds
+preprocess_to_tensor took 0.0028815269470214844 seconds
+preprocess_normalize took 0.00724029541015625 seconds
+embed_image took 0.4384312629699707 seconds
+search_similar_in_weaviate took 0.123016357421875 seconds
+
+preprocess_resize took 0.009558916091918945 seconds
+preprocess_center_crop took 0.00018858909606933594 seconds
+preprocess_to_tensor took 0.0009210109710693359 seconds
+preprocess_normalize took 0.0003294944763183594 seconds
+embed_image took 0.4189567565917969 seconds
+search_similar_in_weaviate took 0.0811319351196289 seconds
+
+preprocess_resize took 0.009733438491821289 seconds
+preprocess_center_crop took 0.00020074844360351562 seconds
+preprocess_to_tensor took 0.0009264945983886719 seconds
+preprocess_normalize took 0.0004818439483642578 seconds
+embed_image took 0.39894556999206543 seconds
+search_similar_in_weaviate took 0.13485097885131836 seconds
+```
+
+### 4. 사이즈 3000*3000 업로드(약 500개 업로드), 검색
+```
+Issue9/locustResult/upConv3000.html
+Issue9/locustResult/searchSim_Conv3000.html
+```
+
+```
+read_image took 3.0994415283203125e-06 seconds
+save_image took 0.001293182373046875 seconds
+save_to_db took 0.005756378173828125 seconds
+send_to_kafka took 0.00025153160095214844 seconds
+
+read_image took 3.0994415283203125e-06 seconds
+save_image took 0.001285552978515625 seconds
+save_to_db took 0.007987737655639648 seconds
+send_to_kafka took 0.00030493736267089844 seconds
+
+read_image took 2.6226043701171875e-06 seconds
+save_image took 0.004534482955932617 seconds
+save_to_db took 0.006303310394287109 seconds
+send_to_kafka took 0.00025200843811035156 seconds
+```
+
+```
+
+```
+
+** embed_image에서 조금 오래 걸림 **
+ConvNeXt -> ResNet18 or ResNet 50 사용해보기
