@@ -31,44 +31,44 @@ class ImageTasks(TaskSet):
     #     self.client.post("/upload/", files=files)
     #     self.wait()
     
-    @task
-    def search_similar(self):
-        client = weaviate.Client(url=WEAVIATE_URL)
-        try:
-            # 무작위로 저장된 벡터 선택
-            query_result = client.query.get("ImageEmbedding", ["embedding"]).with_limit(1).do()
-            if query_result and query_result['data']['Get']['ImageEmbedding']:
-                random_vector = query_result['data']['Get']['ImageEmbedding'][0]['embedding']
-            else:
-                raise Exception("No embeddings found in Weaviate")
-
-            start_time = time.time()
-            search_result = client.query.get("ImageEmbedding", ["uuid", "_additional {certainty}"])\
-                .with_near_vector({"vector": random_vector})\
-                .with_limit(5)\
-                .do()
-            end_time = time.time()
-
-            search_time = end_time - start_time
-            print(f"Search time: {search_time:.4f} seconds")
-
-            for result in search_result['data']['Get']['ImageEmbedding']:
-                certainty = result['_additional']['certainty']
-                cosine_similarity = weaviate_certainty_to_cosine(certainty)
-                print(f"UUID: {result['uuid']}, Cosine Similarity: {cosine_similarity:.4f}")
-
-        except Exception as e:
-            print(f"Error during search_similar task: {e}")
-
-        self.wait()
-
-
     # @task
     # def search_similar(self):
-    #     image = generate_random_image(100, 100)
-    #     files = {'file': ('test.jpg', image, 'image/jpeg')}
-    #     self.client.post("/search_similar/", files=files) 
+    #     client = weaviate.Client(url=WEAVIATE_URL)
+    #     try:
+    #         # 무작위로 저장된 벡터 선택
+    #         query_result = client.query.get("ImageEmbedding", ["embedding"]).with_limit(1).do()
+    #         if query_result and query_result['data']['Get']['ImageEmbedding']:
+    #             random_vector = query_result['data']['Get']['ImageEmbedding'][0]['embedding']
+    #         else:
+    #             raise Exception("No embeddings found in Weaviate")
+
+    #         start_time = time.time()
+    #         search_result = client.query.get("ImageEmbedding", ["uuid", "_additional {certainty}"])\
+    #             .with_near_vector({"vector": random_vector})\
+    #             .with_limit(5)\
+    #             .do()
+    #         end_time = time.time()
+
+    #         search_time = end_time - start_time
+    #         print(f"Search time: {search_time:.4f} seconds")
+
+    #         for result in search_result['data']['Get']['ImageEmbedding']:
+    #             certainty = result['_additional']['certainty']
+    #             cosine_similarity = weaviate_certainty_to_cosine(certainty)
+    #             print(f"UUID: {result['uuid']}, Cosine Similarity: {cosine_similarity:.4f}")
+
+    #     except Exception as e:
+    #         print(f"Error during search_similar task: {e}")
+
     #     self.wait()
+
+
+    @task
+    def search_similar(self):
+        image = generate_random_image(100, 100)
+        files = {'file': ('test.jpg', image, 'image/jpeg')}
+        self.client.post("/search_similar/", files=files) 
+        self.wait()
 
         
 #    @task
