@@ -97,12 +97,15 @@ def load_test_images(folder):
 
 def classify_images(model_dict, train_folder, test_folder, cuda=False):
     train_images, train_labels = load_images_from_folder(train_folder)
-    test_images, test_filenames = load_test_images(test_folder)
+    print(f"Loaded {len(train_images)} training images from {train_folder}")
     
+    test_images, test_filenames = load_test_images(test_folder)
+    print(f"Loaded {len(test_images)} testing images from {test_folder}")
+
     label_set = sorted(set(train_labels))
     label_to_index = {label: idx for idx, label in enumerate(label_set)}
     index_to_label = {idx: label for label, idx in label_to_index.items()}
-    
+
     results = {}
     for model_display_name, model_name in model_dict.items():
         print(f"Evaluating model {model_name}")
@@ -111,18 +114,42 @@ def classify_images(model_dict, train_folder, test_folder, cuda=False):
         else:
             img2vec = Img2Vec(model_name, cuda=cuda)
  
-        start_time = time.time()
-        train_embeddings = [img2vec.get_vec(img) for img in train_images]
+        #############
+        print(f"Extracting features for training images using {model_display_name}...")
+        train_embeddings = []
+        for i, img in enumerate(train_images):
+            if i % 100 == 0 and i > 0:
+                print(f"Processed {i}/{len(train_images)} training images")
+            train_embeddings.append(img2vec.get_vec(img))
         train_embeddings = np.array(train_embeddings)
+        ##############
+
+        start_time = time.time()
+        # train_embeddings = [img2vec.get_vec(img) for img in train_images]
+        # train_embeddings = np.array(train_embeddings)
         processing_time = (time.time() - start_time) / len(train_images)
 
-        test_embeddings = [img2vec.get_vec(img) for img in test_images]
+        ###############
+        print(f"Extracting features for testing images using {model_display_name}...")
+        test_embeddings = []
+        for i, img in enumerate(test_images):
+            if i % 100 == 0 and i > 0:
+                print(f"Processed {i}/{len(test_images)} testing images")
+            test_embeddings.append(img2vec.get_vec(img))
+        ##########
 
+        # test_embeddings = [img2vec.get_vec(img) for img in test_images]
+
+        print(f"Classifying for testing images using {model_display_name}...")
         predicted_labels = []
         for test_embedding in test_embeddings:
             similarities = [cosine_similarity([test_embedding], [train_embedding])[0][0] for train_embedding in train_embeddings]
             most_similar_index = np.argmax(similarities)
             predicted_labels.append(train_labels[most_similar_index])
+
+            if i % 100 == 0 and i > 0:  #################
+                print(f"Classified {i}/{len(test_images)} testing images")
+
 
         true_labels = [filename.split('_')[0] for filename in test_filenames]  # Assuming the true label is encoded in the filename
 
@@ -149,8 +176,8 @@ def visualize_confusion_matrix(cm, model_name, class_names):
     plt.show()
 
 if __name__ == "__main__":
-    train_folder = '/Users/hahyeonji/Documents/AIV_Intern/ImageImbedding/data-gatter/classified_train_L_2'  # classified_train_L  train_L
-    test_folder = '/Users/hahyeonji/Documents/AIV_Intern/ImageImbedding/data-gatter/test_set'
+    train_folder = '/Users/hahyeonji/Documents/AIV_Intern/ImageImbedding/data-gatter/NEW_TRAIN_NR'  # TRAIN_SET_A : 전체 데이터  TRAIN_SET_R : RING 기준  TRAIN_SET_NR : DOT(42) 기준
+    test_folder = '/Users/hahyeonji/Documents/AIV_Intern/ImageImbedding/data-gatter/TEST_SET_A'
     model_dict = {
         'ConvNeXt': 'convnext_base',
         'ResNet18': 'resnet18',
