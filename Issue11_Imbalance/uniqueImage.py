@@ -1,3 +1,8 @@
+# classify unique data
+# 1. 이미지 특징 벡터와 이미지 사이즈 정보를 결합하여 유사도 행렬을 계산
+# 2. 초기 unique 이미지를 설정하고, 남은 이미지를 유사도에 따라 추가로 분류
+# 3. 초기 unique 이미지를 설정할 때 유사도 행렬의 합을 기준으로 클러스터링 기반의 접근을 사용
+
 import os
 import shutil
 import torch
@@ -11,8 +16,9 @@ import numpy as np
 ssl._create_default_https_context = ssl._create_unverified_context
 
 # 이미지 폴더 경로 설정
-base_dir = '/Users/hahyeonji/Documents/AIV_Intern/ImageImbedding/downloaded'
-output_dir = '/Users/hahyeonji/Documents/AIV_Intern/ImageImbedding/Issue11_Imbalance/classIMG__'
+# '/Users/hahyeonji/Documents/AIV_Intern/ImageImbedding/downloaded' 
+base_dir =  '/Users/hahyeonji/Documents/AIV_Intern/ImageImbedding/data-gatter/TRAIN_SET_A'
+output_dir = '/Users/hahyeonji/Documents/AIV_Intern/ImageImbedding/data-gatter/NEW_TRAIN_R'
 
 # 이미지 전처리
 preprocess = transforms.Compose([
@@ -38,8 +44,10 @@ def calculate_similarity(features_list):
     similarity_matrix = cosine_similarity(features_list)
     return similarity_matrix
 
-def classify_images(class_path, min_count=5):
-    images = [f for f in os.listdir(class_path) if os.path.isfile(os.path.join(class_path, f))]
+def classify_images(class_path, min_count):
+    valid_image_extensions = ['.jpg', '.jpeg', '.png', '.bmp', '.tiff']
+    images = [f for f in os.listdir(class_path) if os.path.isfile(os.path.join(class_path, f)) and os.path.splitext(f)[1].lower() in valid_image_extensions]
+    
     image_features = []
     image_sizes = []
     for img in images:
@@ -48,26 +56,34 @@ def classify_images(class_path, min_count=5):
         with Image.open(img_path) as image:
             width, height = image.size
         size_info = (width, height)
-        image_features.append(features)
-        image_sizes.append(size_info)
+        image_features.append((features, size_info))
 
-    similarity_matrix = calculate_similarity(image_features)
+    # Similarity matrix calculation using both feature and size info
+    features_array = np.array([f[0] for f in image_features])
+    size_array = np.array([f[1] for f in image_features])
+    combined_features = np.hstack((features_array, size_array))
+
+    similarity_matrix = calculate_similarity(combined_features)
+
     unique_images = []
     similar_images = []
 
-    for idx, img in enumerate(images):
-        if len(unique_images) < min_count:
-            unique_images.append(img)
-        else:
-            # Calculate maximum similarity with the already selected unique images
-            max_similarity = max([similarity_matrix[idx][i] for i in range(len(images)) if images[i] in unique_images])
-            if max_similarity < 0.9:  # 유사도 임계값 설정
-                if len(unique_images) < min_count:
-                    unique_images.append(img)
-                else:
-                    similar_images.append(img)
+    # 초기 unique_images 설정
+    initial_indices = np.argsort(np.sum(similarity_matrix, axis=1))[:min_count]
+    unique_images = [images[i] for i in initial_indices]
+
+    remaining_indices = [i for i in range(len(images)) if i not in initial_indices]
+
+    for idx in remaining_indices:
+        similarities = [similarity_matrix[idx][i] for i in range(len(images)) if images[i] in unique_images]
+        max_similarity = max(similarities) if similarities else 0
+        if max_similarity < 0.9:
+            if len(unique_images) < min_count:
+                unique_images.append(images[idx])
             else:
-                similar_images.append(img)
+                similar_images.append(images[idx])
+        else:
+            similar_images.append(images[idx])
 
     # 고유 이미지 수를 Min_count로 고정
     if len(unique_images) > min_count:
@@ -81,7 +97,8 @@ def main():
         os.makedirs(output_dir)
 
     class_dirs = [d for d in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, d))]
-    min_count = 5
+    image_counts = {cls: len(os.listdir(os.path.join(base_dir, cls))) for cls in class_dirs}
+    min_count = min(image_counts.values())
 
     for cls in class_dirs:
         class_path = os.path.join(base_dir, cls)
