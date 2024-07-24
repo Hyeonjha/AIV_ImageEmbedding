@@ -81,13 +81,12 @@ Classification Report:
 weighted avg       0.01      0.09      0.01       111
 ```
 
-#### lr 0.0001, batch 32, epoch 100 
--> same result
+#### lr 0.0001, batch 32, epoch 100 -> same result
 
-#### lr 0.0001, batch 8, epoch 50
--> same result
+#### lr 0.0001, batch 8, epoch 50 -> same result
 
-#### lr 0.0001, batch 8, epoch 100
+
+#### lr 0.0001, batch 8, epoch 100 -> same result
 
 
 ### EfficientNetB0
@@ -115,8 +114,7 @@ Classification Report:
 weighted avg       0.00      0.01      0.00       111
 ```
 
-#### lr 0.0001, batch 32, epoch 100 
--> same result
+#### lr 0.0001, batch 32, epoch 100 -> same result
 
 #### lr 0.0001, batch 8, epoch 50
 ```
