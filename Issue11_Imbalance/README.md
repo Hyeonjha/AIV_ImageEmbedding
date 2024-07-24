@@ -318,17 +318,31 @@ weighted avg       0.55      0.50      0.50       111
 #### lr 0.0001, batch 32, epoch 50 
 ```
 Model: EfficientNetV2
+Classification Report:
+              precision    recall  f1-score   support
+
+        BOLD       0.00      0.00      0.00        10
+      BUBBLE       0.00      0.00      0.00        10
+        BURR       0.09      1.00      0.17        10
+      DAMAGE       0.00      0.00      0.00        10
+         DOT       0.00      0.00      0.00        10
+        DUST       0.00      0.00      0.00        10
+        FOLD       0.00      0.00      0.00        10
+        LINE       0.00      0.00      0.00        10
+       REACT       0.00      0.00      0.00        10
+        RING       0.00      0.00      0.00         1
+     SCRATCH       0.00      0.00      0.00        10
+         TIP       0.00      0.00      0.00        10
+
+    accuracy                           0.09       111
+   macro avg       0.01      0.08      0.01       111
+weighted avg       0.01      0.09      0.01       111
 ```
 
 
-```
-Model: EfficientNetV2
-```
+#### lr 0.0001, batch 8, epoch 50 -> same result
 
-
-```
-Model: EfficientNetV2
-```
+#### lr 0.0001, batch 32, epoch 100  -> same result
 
 
 
@@ -336,200 +350,274 @@ Model: EfficientNetV2
 #### lr 0.0001, batch 32, epoch 50 
 ```
 Model: EfficientNet B0
+Classification Report:
+              precision    recall  f1-score   support
+
+        BOLD       0.09      1.00      0.17        10
+      BUBBLE       0.00      0.00      0.00        10
+        BURR       0.00      0.00      0.00        10
+      DAMAGE       0.00      0.00      0.00        10
+         DOT       0.00      0.00      0.00        10
+        DUST       0.00      0.00      0.00        10
+        FOLD       0.00      0.00      0.00        10
+        LINE       0.00      0.00      0.00        10
+       REACT       0.00      0.00      0.00        10
+        RING       0.00      0.00      0.00         1
+     SCRATCH       0.00      0.00      0.00        10
+         TIP       0.00      0.00      0.00        10
+
+    accuracy                           0.09       111
+   macro avg       0.01      0.08      0.01       111
+weighted avg       0.01      0.09      0.01       111
 ```
 
-
+#### lr 0.0001, batch 8, epoch 50 
 ```
 Model: EfficientNet B0
+Classification Report:
+              precision    recall  f1-score   support
+
+        BOLD       0.53      0.80      0.64        10
+      BUBBLE       0.75      0.30      0.43        10
+        BURR       0.50      0.10      0.17        10
+      DAMAGE       0.18      0.30      0.22        10
+         DOT       0.56      0.90      0.69        10
+        DUST       0.00      0.00      0.00        10
+        FOLD       0.43      0.30      0.35        10
+        LINE       0.50      0.70      0.58        10
+       REACT       1.00      1.00      1.00        10
+        RING       0.25      1.00      0.40         1
+     SCRATCH       0.43      0.60      0.50        10
+         TIP       0.38      0.30      0.33        10
+
+    accuracy                           0.49       111
+   macro avg       0.46      0.53      0.44       111
+weighted avg       0.48      0.49      0.45       111
 ```
 
-
+#### lr 0.0001, batch 8, epoch 100 
 ```
 Model: EfficientNet B0
+Classification Report:
+              precision    recall  f1-score   support
+
+        BOLD       0.57      0.40      0.47        10
+      BUBBLE       0.86      0.60      0.71        10
+        BURR       0.50      0.40      0.44        10
+      DAMAGE       0.29      0.40      0.33        10
+         DOT       0.44      0.80      0.57        10
+        DUST       0.00      0.00      0.00        10
+        FOLD       0.43      0.30      0.35        10
+        LINE       0.44      0.40      0.42        10
+       REACT       1.00      1.00      1.00        10
+        RING       0.20      1.00      0.33         1
+     SCRATCH       0.31      0.50      0.38        10
+         TIP       0.22      0.20      0.21        10
+
+    accuracy                           0.46       111
+   macro avg       0.44      0.50      0.44       111
+weighted avg       0.46      0.46      0.44       111
 ```
 
+
+
+
+
+## TRAIN_SET_HL_NR
 ### EfficientNetV2
 #### lr 0.0001, batch 32, epoch 50 
 ```
 Model: EfficientNetV2
+Classification Report:
+              precision    recall  f1-score   support
+
+        BOLD       0.00      0.00      0.00        10
+      BUBBLE       0.00      0.00      0.00        10
+        BURR       0.00      0.00      0.00        10
+      DAMAGE       0.00      0.00      0.00        10
+         DOT       0.00      0.00      0.00        10
+        DUST       0.09      1.00      0.17        10
+        FOLD       0.00      0.00      0.00        10
+        LINE       0.00      0.00      0.00        10
+       REACT       0.00      0.00      0.00        10
+        RING       0.00      0.00      0.00         1
+     SCRATCH       0.00      0.00      0.00        10
+         TIP       0.00      0.00      0.00        10
+
+    accuracy                           0.09       111
+   macro avg       0.01      0.08      0.01       111
+weighted avg       0.01      0.09      0.01       111
 ```
 
-
+#### lr 0.0001, batch 32, epoch 100
 ```
 Model: EfficientNetV2
+Classification Report:
+              precision    recall  f1-score   support
+
+        BOLD       0.21      0.40      0.28        10
+      BUBBLE       0.75      0.60      0.67        10
+        BURR       0.15      0.20      0.17        10
+      DAMAGE       0.00      0.00      0.00        10
+         DOT       0.62      0.80      0.70        10
+        DUST       0.50      1.00      0.67        10
+        FOLD       0.00      0.00      0.00        10
+        LINE       0.53      0.90      0.67        10
+       REACT       0.91      1.00      0.95        10
+        RING       0.00      0.00      0.00         1
+     SCRATCH       0.50      0.20      0.29        10
+         TIP       0.75      0.30      0.43        10
+
+    accuracy                           0.49       111
+   macro avg       0.41      0.45      0.40       111
+weighted avg       0.44      0.49      0.43       111
 ```
 
-
+#### lr 0.0001, batch 8, epoch 50 
 ```
 Model: EfficientNetV2
+Classification Report:
+              precision    recall  f1-score   support
+
+        BOLD       0.00      0.00      0.00        10
+      BUBBLE       0.00      0.00      0.00        10
+        BURR       0.00      0.00      0.00        10
+      DAMAGE       0.00      0.00      0.00        10
+         DOT       0.00      0.00      0.00        10
+        DUST       0.09      0.90      0.16        10
+        FOLD       0.00      0.00      0.00        10
+        LINE       0.00      0.00      0.00        10
+       REACT       1.00      0.10      0.18        10
+        RING       0.00      0.00      0.00         1
+     SCRATCH       0.00      0.00      0.00        10
+         TIP       1.00      0.10      0.18        10
+
+    accuracy                           0.10       111
+   macro avg       0.17      0.09      0.04       111
+weighted avg       0.19      0.10      0.05       111
 ```
 
+#### lr 0.0001, batch 8, epoch 100 
+```
+Model: EfficientNetV2
+Classification Report:
+              precision    recall  f1-score   support
+
+        BOLD       0.00      0.00      0.00        10
+      BUBBLE       0.00      0.00      0.00        10
+        BURR       0.00      0.00      0.00        10
+      DAMAGE       0.00      0.00      0.00        10
+         DOT       0.00      0.00      0.00        10
+        DUST       0.09      1.00      0.17        10
+        FOLD       0.00      0.00      0.00        10
+        LINE       0.00      0.00      0.00        10
+       REACT       0.00      0.00      0.00        10
+        RING       0.00      0.00      0.00         1
+     SCRATCH       0.00      0.00      0.00        10
+         TIP       0.00      0.00      0.00        10
+
+    accuracy                           0.09       111
+   macro avg       0.01      0.08      0.01       111
+weighted avg       0.01      0.09      0.02       111
+
+```
 
 
 ### EfficientNetB0
 #### lr 0.0001, batch 32, epoch 50 
 ```
 Model: EfficientNet B0
+Classification Report:
+              precision    recall  f1-score   support
+
+        BOLD       0.44      0.70      0.54        10
+      BUBBLE       0.90      0.90      0.90        10
+        BURR       0.64      0.70      0.67        10
+      DAMAGE       0.80      0.40      0.53        10
+         DOT       0.64      0.70      0.67        10
+        DUST       0.50      0.80      0.62        10
+        FOLD       0.57      0.40      0.47        10
+        LINE       0.86      0.60      0.71        10
+       REACT       0.91      1.00      0.95        10
+        RING       1.00      1.00      1.00         1
+     SCRATCH       0.27      0.30      0.29        10
+         TIP       0.40      0.20      0.27        10
+
+    accuracy                           0.61       111
+   macro avg       0.66      0.64      0.63       111
+weighted avg       0.63      0.61      0.60       111
 ```
 
-
-```
-Model: EfficientNet B0
-```
-
-
-```
-Model: EfficientNet B0
-```
-
-
-
-
-### EfficientNetV2
-#### lr 0.0001, batch 32, epoch 50 
-```
-Model: EfficientNetV2
-```
-
-
-```
-Model: EfficientNetV2
-```
-
-
-```
-Model: EfficientNetV2
-```
-
-
-
-### EfficientNetB0
-#### lr 0.0001, batch 32, epoch 50 
+ #### lr 0.0001, batch 32, epoch 100
 ```
 Model: EfficientNet B0
+Classification Report:
+              precision    recall  f1-score   support
+
+        BOLD       0.83      0.50      0.62        10
+      BUBBLE       0.83      1.00      0.91        10
+        BURR       0.42      0.80      0.55        10
+      DAMAGE       0.60      0.60      0.60        10
+         DOT       0.80      0.40      0.53        10
+        DUST       0.75      0.90      0.82        10
+        FOLD       0.40      0.60      0.48        10
+        LINE       0.83      0.50      0.62        10
+       REACT       0.91      1.00      0.95        10
+        RING       1.00      1.00      1.00         1
+     SCRATCH       0.62      0.50      0.56        10
+         TIP       0.33      0.20      0.25        10
+
+    accuracy                           0.64       111
+   macro avg       0.69      0.67      0.66       111
+weighted avg       0.67      0.64      0.63       111
 ```
 
-
-```
-Model: EfficientNet B0
-```
-
-
-```
-Model: EfficientNet B0
-```
-
-
-
-
-
-
-### EfficientNetV2
-#### lr 0.0001, batch 32, epoch 50 
-```
-Model: EfficientNetV2
-```
-
-
-```
-Model: EfficientNetV2
-```
-
-
-```
-Model: EfficientNetV2
-```
-
-
-
-### EfficientNetB0
-#### lr 0.0001, batch 32, epoch 50 
+#### lr 0.0001, batch 8, epoch 50
 ```
 Model: EfficientNet B0
+Classification Report:
+              precision    recall  f1-score   support
+
+        BOLD       0.44      0.40      0.42        10
+      BUBBLE       0.78      0.70      0.74        10
+        BURR       0.47      0.90      0.62        10
+      DAMAGE       0.43      0.30      0.35        10
+         DOT       0.73      0.80      0.76        10
+        DUST       0.75      0.60      0.67        10
+        FOLD       0.27      0.40      0.32        10
+        LINE       0.71      0.50      0.59        10
+       REACT       0.82      0.90      0.86        10
+        RING       0.00      0.00      0.00         1
+     SCRATCH       0.46      0.60      0.52        10
+         TIP       1.00      0.20      0.33        10
+
+    accuracy                           0.57       111
+   macro avg       0.57      0.53      0.52       111
+weighted avg       0.62      0.57      0.56       111
 ```
 
-
-```
-Model: EfficientNet B0
-```
-
-
-```
-Model: EfficientNet B0
-```
-
-
-
-
-
-
-### EfficientNetV2
-#### lr 0.0001, batch 32, epoch 50 
-```
-Model: EfficientNetV2
-```
-
-
-```
-Model: EfficientNetV2
-```
-
-
-```
-Model: EfficientNetV2
-```
-
-
-
-### EfficientNetB0
-#### lr 0.0001, batch 32, epoch 50 
+#### lr 0.0001, batch 8, epoch 100
 ```
 Model: EfficientNet B0
+Classification Report:
+              precision    recall  f1-score   support
+
+        BOLD       0.70      0.70      0.70        10
+      BUBBLE       0.71      1.00      0.83        10
+        BURR       0.50      0.60      0.55        10
+      DAMAGE       0.36      0.40      0.38        10
+         DOT       0.62      0.50      0.56        10
+        DUST       0.78      0.70      0.74        10
+        FOLD       0.38      0.30      0.33        10
+        LINE       0.56      0.50      0.53        10
+       REACT       0.83      1.00      0.91        10
+        RING       1.00      1.00      1.00         1
+     SCRATCH       0.50      0.50      0.50        10
+         TIP       0.43      0.30      0.35        10
+
+    accuracy                           0.59       111
+   macro avg       0.61      0.62      0.61       111
+weighted avg       0.58      0.59      0.58       111
 ```
 
 
-```
-Model: EfficientNet B0
-```
-
-
-```
-Model: EfficientNet B0
-```
-
-
-
-
-### EfficientNetV2
-#### lr 0.0001, batch 32, epoch 50 
-```
-Model: EfficientNetV2
-```
-
-
-```
-Model: EfficientNetV2
-```
-
-
-```
-Model: EfficientNetV2
-```
-
-
-
-### EfficientNetB0
-#### lr 0.0001, batch 32, epoch 50 
-```
-Model: EfficientNet B0
-```
-
-
-```
-Model: EfficientNet B0
-```
-
-
-```
-Model: EfficientNet B0
-```
