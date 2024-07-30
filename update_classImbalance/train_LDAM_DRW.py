@@ -185,7 +185,7 @@ if __name__ == "__main__":
     train_loader, test_loader, class_names = load_data(args.train_folder, args.test_folder, batch_size=args.batch_size)
 
     model_dict = {
-        # 'EfficientNetV2': 'efficientnet_v2_s',
+        'EfficientNetV2': 'efficientnet_v2_s',
         'EfficientNet B0': 'efficientnet_b0'
     }
 
