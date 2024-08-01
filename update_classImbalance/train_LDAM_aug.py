@@ -8,11 +8,8 @@ import numpy as np
 from sklearn.metrics import confusion_matrix, classification_report
 import os
 import ssl
-import matplotlib.pyplot as plt
-import seaborn as sns
 from PIL import Image
 import argparse
-from losses import LDAMLoss
 
 # SSL 인증서 설정
 import certifi
@@ -36,12 +33,14 @@ class CustomDatasetWithAugmentation(Dataset):
             transforms.RandomVerticalFlip(p=1),
             transforms.RandomRotation(30),
         ])
+        self.classes = dataset.classes
+        self.targets = dataset.targets
         
     def __len__(self):
-        return len(self.dataset) * 3  # 원본 이미지와 세 가지 증강 이미지
+        return len(self.dataset) * 3
 
     def __getitem__(self, idx):
-        img, label = self.dataset[idx // 4]
+        img, label = self.dataset[idx // 3]
         if idx % 4 == 1:
             img = transforms.functional.hflip(img)
         elif idx % 4 == 2:
@@ -96,19 +95,6 @@ def load_data(train_folder, test_folder, batch_size=32):
     
     return train_loader, test_loader, train_dataset.classes
 
-def adjust_learning_rate(optimizer, epoch, lr):
-    epoch = epoch + 1
-    if epoch <= 5:
-        lr = lr * epoch / 5
-    elif epoch > 180:
-        lr = lr * 0.0001
-    elif epoch > 160:
-        lr = lr * 0.01
-    else:
-        lr = lr
-    for param_group in optimizer.param_groups:
-        param_group['lr'] = lr
-
 class Classifier():
     def __init__(self, model_name, num_classes, pretrained=True, cuda=False):
         self.device = torch.device("cuda" if cuda else "cpu")
@@ -122,8 +108,7 @@ class Classifier():
         self.model = self.model.to(self.device)
 
     def train(self, train_loader, test_loader, epochs=10, lr=0.0001):
-        cls_num_list = [len(np.where(np.array(train_loader.dataset.targets) == i)[0]) for i in range(len(train_loader.dataset.classes))]
-        criterion = LDAMLoss(cls_num_list=cls_num_list, max_m=0.5, s=30).to(self.device)
+        criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
         
         train_losses = []
@@ -132,18 +117,6 @@ class Classifier():
         self.model.train()
         for epoch in range(epochs):
             running_loss = 0.0
-            adjust_learning_rate(optimizer, epoch, lr)
-            
-            if epoch < 160:
-                per_cls_weights = None
-            else:
-                beta = 0.9999
-                effective_num = 1.0 - np.power(beta, cls_num_list)
-                per_cls_weights = (1.0 - beta) / np.array(effective_num)
-                per_cls_weights = per_cls_weights / np.sum(per_cls_weights) * len(cls_num_list)
-                per_cls_weights = torch.FloatTensor(per_cls_weights).to(self.device)
-                criterion.weight = per_cls_weights
-
             for i, (inputs, labels) in enumerate(train_loader):
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
                 
@@ -209,13 +182,13 @@ class Classifier():
         return cm, report
 
 if __name__ == "__main__":
+    
     parser = argparse.ArgumentParser(description="Train and evaluate a classifier")
     parser.add_argument('--train_folder', type=str, required=True, help='Path to the training data folder')
     parser.add_argument('--test_folder', type=str, required=True, help='Path to the test data folder')
     parser.add_argument('--epochs', type=int, default=10, help='Number of epochs for training')
     parser.add_argument('--batch_size', type=int, default=32, help='Batch size for training')
-    parser.add_argument('--lr', type=float, default=0.0001, help='Learning rate')  # 추가된 부분
-    parser.add_argument('--seed', type=int, default=42, help='Random seed')  # 추가된 부분
+    parser.add_argument('--seed', type=int, default=42, help='Random seed')
     args = parser.parse_args()
 
     set_seed(args.seed)  # Seed 설정
@@ -233,7 +206,7 @@ if __name__ == "__main__":
         print(f"Training and evaluating model {model_name}")
         classifier = Classifier(model, num_classes=len(class_names), pretrained=False, cuda=cuda)
         print(f"Starting training for model {model_name}...")
-        train_losses, test_accuracies = classifier.train(train_loader, test_loader, epochs=args.epochs, lr=args.lr)
+        train_losses, test_accuracies = classifier.train(train_loader, test_loader, epochs=args.epochs, lr=0.0001)
         print(f"Finished training for model {model_name}")
 
         # 평가
