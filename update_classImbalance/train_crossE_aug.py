@@ -38,10 +38,10 @@ class CustomDatasetWithAugmentation(Dataset):
         return len(self.dataset) * 3  # 원본 이미지와 세 가지 증강 이미지
 
     def __getitem__(self, idx):
-        img, label = self.dataset[idx // 4]
-        if idx % 4 == 1:
+        img, label = self.dataset[idx // 3]
+        if idx % 3 == 1:
             img = transforms.functional.hflip(img)
-        elif idx % 4 == 2:
+        elif idx % 3 == 2:
             img = transforms.functional.vflip(img)
         # elif idx % 4 == 3:
         #     img = transforms.functional.rotate(img, 30)

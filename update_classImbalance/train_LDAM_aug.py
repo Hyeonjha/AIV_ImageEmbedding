@@ -41,9 +41,9 @@ class CustomDatasetWithAugmentation(Dataset):
 
     def __getitem__(self, idx):
         img, label = self.dataset[idx // 3]
-        if idx % 4 == 1:
+        if idx % 3 == 1:
             img = transforms.functional.hflip(img)
-        elif idx % 4 == 2:
+        elif idx % 3 == 2:
             img = transforms.functional.vflip(img)
         # elif idx % 4 == 3:
         #     img = transforms.functional.rotate(img, 30)
